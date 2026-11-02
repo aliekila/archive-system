@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>أرشيف المؤسسة الرقمي | v7.0</title>
+    
+    <!-- Bootstrap 5 RTL CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Google Fonts (Cairo) -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-main: #f8fafc;
+            --surface: #ffffff;
+            --surface-sub: #f1f5f9;
+            --primary: #2563eb;
+            --primary-soft: rgba(37, 99, 235, 0.08);
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --sidebar-width: 250px;
+            --radius: 14px;
+        }
+
+        body.dark-mode {
+            --bg-main: #0b1120;
+            --surface: #1e293b;
+            --surface-sub: #0f172a;
+            --primary: #3b82f6;
+            --primary-soft: rgba(59, 130, 246, 0.14);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Clean Flat Surfaces */
+        .clean-card {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            transition: transform 0.15s ease, border-color 0.15s ease;
+        }
+
+        .clean-btn {
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+
+        /* Full Screen Clean Login */
+        .login-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-main);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        .login-box {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            width: 100%;
+            max-width: 400px;
+            padding: 2rem 1.5rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.04);
+        }
+        .org-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            background: var(--primary);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+        }
+        .org-logo img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* App Layout */
+        .app-shell {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .app-sidebar {
+            width: var(--sidebar-width);
+            background: var(--surface);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .app-main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            padding-bottom: 75px; /* Space for mobile bottom nav */
+        }
+
+        .app-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.75rem 1.25rem;
+            position: sticky;
+            top: 0;
+            z-index: 1020;
+        }
+
+        /* Navigation Links */
+        .side-nav .nav-link {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.92rem;
+            padding: 0.65rem 0.9rem;
+            border-radius: 10px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .side-nav .nav-link:hover,
+        .side-nav .nav-link.active {
+            background: var(--primary-soft);
+            color: var(--primary);
+        }
+
+        /* Folder & File Minimal Items */
+        .folder-item {
+            cursor: pointer;
+            padding: 0.95rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .folder-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .file-item {
+            padding: 0.9rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .file-item:last-child { border-bottom: none; }
+        .file-item:hover { background: var(--surface-sub); }
+
+        .icon-sq {
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+        .icon-pdf { background: rgba(239, 68, 68, 0.12); color: #ef4444; }
+        .icon-doc { background: rgba(37, 99, 235, 0.12); color: #2563eb; }
+        .icon-xls { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+        .icon-img { background: rgba(245, 158, 11, 0.12); color: #f59e0b; }
+        .icon-zip { background: rgba(139, 92, 246, 0.12); color: #8b5cf6; }
+        .icon-other { background: rgba(100, 116, 139, 0.12); color: #64748b; }
+
+        .avatar-sm {
+            width: 34px;
+            height: 34px;
+            border-radius: 9px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #fff;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        /* Mobile Bottom Bar */
+        .mobile-bottom-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--surface);
+            border-top: 1px solid var(--border-color);
+            z-index: 1040;
+            padding: 0.35rem 0.5rem;
+            justify-content: space-around;
+        }
+        .mobile-nav-btn {
+            flex: 1;
+            text-align: center;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 0.35rem 0.2rem;
+            border-radius: 8px;
+        }
+        .mobile-nav-btn i {
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 1px;
+        }
+        .mobile-nav-btn.active {
+            color: var(--primary);
+            background: var(--primary-soft);
+        }
+
+        /* Watermark */
+        .watermark-box { position: relative; overflow: hidden; }
+        .watermark-box::after {
+            content: attr(data-watermark);
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: rgba(239, 68, 68, 0.15);
+            transform: rotate(-15deg);
+            pointer-events: none;
+        }
+
+        /* Dark Mode Form Overrides */
+        body.dark-mode .form-control,
+        body.dark-mode .form-select,
+        body.dark-mode .input-group-text {
+            background-color: var(--surface-sub);
+            border-color: var(--border-color);
+            color: var(--text-main);
+        }
+        body.dark-mode .bg-light { background-color: var(--surface-sub) !important; }
+        body.dark-mode .text-dark { color: var(--text-main) !important; }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 991.98px) {
+            .app-sidebar {
+                position: fixed;
+                top: 0;
+                right: -270px;
+                height: 100vh;
+                z-index: 2000;
+                transition: right 0.25s ease;
+            }
+            .app-sidebar.show { right: 0; }
+            .sidebar-backdrop {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0, 0, 0, 0.45);
+                z-index: 1990;
+            }
+            .sidebar-backdrop.show { display: block; }
+            .mobile-bottom-nav { display: flex; }
+        }
+
+        @media (min-width: 992px) {
+            .app-main { padding-bottom: 0; }
+        }
+
+        .toast-holder {
+            position: fixed;
+            bottom: 80px;
+            left: 16px;
+            z-index: 4000;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ==================== 1. MINIMAL LOGIN PORTAL ==================== -->
+<div class="login-overlay" id="fullLoginOverlay">
+    <div class="login-box text-center">
+        <div class="org-logo mx-auto" id="loginPortalLogoBox">
+            <i class="bi bi-building-fill-lock"></i>
+        </div>
+        <h5 class="fw-bold mb-1" id="loginPortalOrgName">أرشيف المؤسسة الرقمي</h5>
+        <p class="text-secondary small mb-4" id="loginPortalOrgSub">بوابة الدخول الآمن للموظفين والإدارة</p>
+
+        <form onsubmit="handleFullLoginSubmit(event)" class="text-start">
+            <div class="mb-3">
+                <label class="form-label small fw-bold">اسم المستخدم</label>
+                <input type="text" id="fullLoginUsername" class="form-control" dir="ltr" placeholder="username" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-bold">كلمة المرور</label>
+                <input type="password" id="fullLoginPassword" class="form-control" dir="ltr" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary clean-btn w-100 py-2 mb-3">
+                <i class="bi bi-box-arrow-in-left"></i> تسجيل الدخول
+            </button>
+        </form>
+
+        <!-- Fast Switch Pills for Demo -->
+        <div class="pt-3 border-top">
+            <small class="text-secondary d-block mb-2">دخول سريع للتجربة:</small>
+            <div class="d-flex flex-wrap justify-content-center gap-1">
+                <button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="quickFillLogin('admin','123456')">المدير</button>
+                <button class="btn btn-sm btn-outline-primary py-1 px-2" onclick="quickFillLogin('ahmed','1234')">أحمد</button>
+                <button class="btn btn-sm btn-outline-success py-1 px-2" onclick="quickFillLogin('sara','1234')">سارة</button>
+                <button class="btn btn-sm btn-outline-warning text-dark py-1 px-2" onclick="quickFillLogin('khaled','1234')">خالد</button>
+            </div>
+        </div>
+
+        <div class="mt-4 pt-2 border-top small">
+            <a href="https://facebook.com/aliakilakotop" target="_blank" class="text-decoration-none fw-bold text-primary">
+                Developed By : Ali Akila
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar Backdrop for Mobile/Tablet -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+<div class="app-shell">
+    <!-- ==================== 2. CLEAN SIDEBAR ==================== -->
+    <aside class="app-sidebar" id="appSidebar">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                <div class="avatar-sm bg-primary" id="sidebarOrgLogoBox"><i class="bi bi-archive-fill"></i></div>
+                <span class="fw-bold text-truncate" id="sidebarOrgTitle">الأرشيف الذكي</span>
+            </div>
+            <button class="btn btn-sm btn-light d-lg-none" onclick="toggleSidebar()"><i class="bi bi-x-lg"></i></button>
+        </div>
+
+        <!-- Compact Active User Pill -->
+        <div class="p-2 rounded-3 bg-light border mb-3 d-flex align-items-center gap-2">
+            <div id="sidebarUserAvatar" class="avatar-sm bg-primary">م</div>
+            <div class="overflow-hidden">
+                <div id="sidebarUserName" class="fw-bold small text-truncate">مدير النظام</div>
+                <div id="sidebarUserRole" class="text-secondary" style="font-size: 0.72rem;">Admin</div>
+            </div>
+        </div>
+
+        <nav class="nav flex-column side-nav mb-auto">
+            <a href="#" class="nav-link active" id="navMyFiles" onclick="switchView('explorer', 'mine'); return false;">
+                <i class="bi bi-shield-lock"></i>
+                <span>ملفاتي الخاصة</span>
+                <span class="badge bg-primary bg-opacity-10 text-primary ms-auto" id="myFilesCountBadge">0</span>
+            </a>
+            <a href="#" class="nav-link" id="navAllFiles" onclick="switchView('explorer', 'all'); return false;">
+                <i class="bi bi-folder2-open"></i>
+                <span>المجلدات</span>
+            </a>
+            <a href="#" class="nav-link" id="navCloudDrive" onclick="switchView('cloud'); return false;">
+                <i class="bi bi-cloud-check"></i>
+                <span>السحابة (Drive)</span>
+            </a>
+            <a href="#" class="nav-link" id="navUsersItem" onclick="switchView('users'); return false;">
+                <i class="bi bi-people"></i>
+                <span>الموظفون</span>
+            </a>
+            <a href="#" class="nav-link" id="navAuditLog" onclick="switchView('audit'); return false;">
+                <i class="bi bi-clock-history"></i>
+                <span>السجل</span>
+            </a>
+            <a href="#" class="nav-link" id="navSettingsItem" onclick="switchView('settings'); return false;">
+                <i class="bi bi-gear"></i>
+                <span>الإعدادات</span>
+            </a>
+            <a href="#" class="nav-link" id="navServerSetup" onclick="switchView('server'); return false;">
+                <i class="bi bi-code-slash"></i>
+                <span>ملفات السيرفر</span>
+            </a>
+        </nav>
+
+        <div class="pt-3 border-top mt-3 small text-secondary">
+            <div class="d-flex justify-content-between mb-2">
+                <span id="storageUsedText">0 MB</span>
+                <span class="text-success fw-bold"><i class="bi bi-shield-check me-1"></i>معزول</span>
+            </div>
+            <button class="btn btn-outline-danger btn-sm w-100 clean-btn" onclick="showFullLoginScreen()">
+                <i class="bi bi-power"></i> تسجيل الخروج
+            </button>
+        </div>
+    </aside>
+
+    <!-- ==================== 3. MAIN WORKSPACE ==================== -->
+    <main class="app-main">
+        <!-- Minimal Header -->
+        <header class="app-header d-flex align-items-center justify-content-between gap-2">
+            <div class="d-flex align-items-center gap-2 overflow-hidden">
+                <button class="btn btn-light border btn-sm d-lg-none" onclick="toggleSidebar()">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h6 class="mb-0 fw-bold text-truncate" id="topNavbarSystemTitle">أرشيف المؤسسة الرقمي</h6>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <!-- Quick User Switcher -->
+                <select id="userSwitcherSelect" class="form-select form-select-sm bg-light fw-bold" style="width: auto; max-width: 155px;" onchange="changeCurrentUser(this.value)"></select>
+
+                <!-- Theme Toggle -->
+                <button class="btn btn-light border btn-sm" onclick="toggleTheme()" title="الوضع الليلي / النهاري">
+                    <i class="bi bi-moon-stars-fill text-primary" id="themeToggleIcon"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="container-fluid p-3 p-md-4" style="max-width: 1300px;">
+
+            <!-- ==================== VIEW: EXPLORER ==================== -->
+            <div id="viewExplorer">
+                <!-- Action Bar + Stats Summary -->
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-2 flex-wrap">
+                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold" id="roleBannerBadge">خزنتي</span>
+                        <span class="text-secondary small"><strong id="statTotalFolders">0</strong> مجلد • <strong id="statMyFiles">0</strong> ملف</span>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light border clean-btn btn-sm" onclick="openFolderModal()">
+                            <i class="bi bi-folder-plus text-warning"></i> <span>مجلد جديد</span>
+                        </button>
+                        <button class="btn btn-primary clean-btn btn-sm" onclick="openFileModal()">
+                            <i class="bi bi-cloud-arrow-up-fill"></i> <span>رفع ملف</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Search & Filter Bar -->
+                <div class="clean-card p-2 mb-3">
+                    <div class="row g-2 align-items-center">
+                        <div class="col-12 col-md-5">
+                            <ol class="breadcrumb mb-0 px-2 py-1 small" id="folderBreadcrumb"></ol>
+                        </div>
+                        <div class="col-7 col-md-4">
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search text-secondary"></i></span>
+                                <input type="text" id="searchInput" class="form-control border-start-0" placeholder="بحث سريع..." oninput="renderExplorer()">
+                            </div>
+                        </div>
+                        <div class="col-5 col-md-3">
+                            <select id="filterTypeSelect" class="form-select form-select-sm" onchange="renderExplorer()">
+                                <option value="ALL">كل الأنواع</option>
+                                <option value="PDF">PDF</option>
+                                <option value="DOCX">Word</option>
+                                <option value="XLSX">Excel</option>
+                                <option value="IMAGE">صور</option>
+                                <option value="ZIP">ZIP</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Folders Grid -->
+                <div class="row g-2 mb-3" id="foldersGridContainer"></div>
+
+                <!-- Files Clean List (Works great on Mobile & Desktop) -->
+                <div class="clean-card overflow-hidden">
+                    <div class="px-3 py-2 border-bottom bg-light d-flex justify-content-between align-items-center">
+                        <span class="fw-bold small">الملفات</span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary" id="visibleFilesCounter">0</span>
+                    </div>
+                    <div id="filesListContainer"></div>
+                </div>
+            </div>
+
+            <!-- ==================== VIEW: CLOUD DRIVE (Google Drive & OneDrive) ==================== -->
+            <div id="viewCloudDrive" class="d-none">
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-6">
+                        <div class="clean-card p-3">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="icon-sq bg-success bg-opacity-10 text-success"><i class="bi bi-google"></i></div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0">Google Drive</h6>
+                                        <small class="text-secondary">مزامنة وأرشفة تلقائية</small>
+                                    </div>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="gdriveAutoSyncToggle" checked>
+                                </div>
+                            </div>
+                            <input type="text" id="gdriveFolderIdInput" class="form-control form-control-sm mb-2" dir="ltr" placeholder="Google Drive Folder ID">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-success btn-sm clean-btn flex-grow-1" onclick="bulkSyncCurrentUserFiles('GDRIVE')">مزامنة ملفاتي</button>
+                                <button class="btn btn-light border btn-sm" onclick="saveCloudProviderConfig('GDRIVE')">حفظ</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-md-6">
+                        <div class="clean-card p-3">
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="icon-sq bg-primary bg-opacity-10 text-primary"><i class="bi bi-microsoft"></i></div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0">Microsoft OneDrive</h6>
+                                        <small class="text-secondary">نسخ احتياطي سحابي</small>
+                                    </div>
+                                </div>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="onedriveAutoSyncToggle" checked>
+                                </div>
+                            </div>
+                            <input type="text" id="onedriveFolderPathInput" class="form-control form-control-sm mb-2" dir="ltr" placeholder="/Enterprise_Archive_Vault">
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary btn-sm clean-btn flex-grow-1" onclick="bulkSyncCurrentUserFiles('ONEDRIVE')">مزامنة ملفاتي</button>
+                                <button class="btn btn-light border btn-sm" onclick="saveCloudProviderConfig('ONEDRIVE')">حفظ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="clean-card overflow-hidden">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                        <span class="fw-bold small">حالة أرشفة الملفات</span>
+                        <button class="btn btn-dark btn-sm clean-btn py-1" onclick="bulkSyncCurrentUserFiles('BOTH')">
+                            <i class="bi bi-arrow-repeat"></i> مزامنة الكل
+                        </button>
+                    </div>
+                    <div id="cloudFilesListContainer"></div>
+                </div>
+            </div>
+
+            <!-- ==================== VIEW: USERS (ADMIN) ==================== -->
+            <div id="viewUsers" class="d-none">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0">حسابات الموظفين</h6>
+                    <button class="btn btn-primary btn-sm clean-btn" id="btnAddUserInView" onclick="openUserModal()">
+                        <i class="bi bi-person-plus"></i> إضافة موظف
+                    </button>
+                </div>
+                <div class="row g-2" id="usersCardsContainer"></div>
+            </div>
+
+            <!-- ==================== VIEW: AUDIT LOG ==================== -->
+            <div id="viewAudit" class="d-none">
+                <div class="clean-card overflow-hidden">
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                        <span class="fw-bold small">سجل النشاط والأمان</span>
+                        <select id="auditFilterAction" class="form-select form-select-sm" style="width: auto;" onchange="renderAuditLog()">
+                            <option value="ALL">الكل</option>
+                            <option value="CREATE_FILE">رفع ملف</option>
+                            <option value="UPDATE_FILE">تعديل</option>
+                            <option value="CLOUD_SYNC">مزامنة سحابية</option>
+                            <option value="SECURITY_ALERT">تنبيه أمني</option>
+                        </select>
+                    </div>
+                    <div id="auditListContainer"></div>
+                </div>
+            </div>
+
+            <!-- ==================== VIEW: SETTINGS ==================== -->
+            <div id="viewSettings" class="d-none">
+                <div class="clean-card p-3 p-md-4 mx-auto" style="max-width: 650px;">
+                    <h6 class="fw-bold mb-3">إعدادات المؤسسة والحماية</h6>
+                    <form onsubmit="saveScriptSettings(event)">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">اسم المؤسسة</label>
+                            <input type="text" id="cfgSiteName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">الوصف المختصر</label>
+                            <input type="text" id="cfgOrgDepartment" class="form-control">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">رابط شعار المؤسسة (اختياري)</label>
+                            <input type="url" id="cfgOrgLogoUrl" class="form-control" dir="ltr" placeholder="https://...">
+                        </div>
+                        <div class="p-3 rounded-3 bg-light border mb-3">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="cfgStrictZeroTrust" checked>
+                                <label class="form-check-label small fw-bold" for="cfgStrictZeroTrust">عزل تام لملفات كل موظف</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="cfgMaintenanceMode">
+                                <label class="form-check-label small fw-bold" for="cfgMaintenanceMode">تفعيل وضع الصيانة</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary clean-btn w-100">حفظ الإعدادات</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ==================== VIEW: SERVER PACKAGE ==================== -->
+            <div id="viewServer" class="d-none">
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3">
+                        <button class="clean-card p-3 w-100 text-center border" onclick="downloadPhpApiFile()">
+                            <i class="bi bi-filetype-php fs-3 text-primary d-block mb-1"></i>
+                            <span class="small fw-bold">تحميل api.php</span>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <button class="clean-card p-3 w-100 text-center border" onclick="downloadSqlSchemaFile()">
+                            <i class="bi bi-filetype-sql fs-3 text-warning d-block mb-1"></i>
+                            <span class="small fw-bold">database.sql</span>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <button class="clean-card p-3 w-100 text-center border" onclick="exportBackupJSON()">
+                            <i class="bi bi-download fs-3 text-success d-block mb-1"></i>
+                            <span class="small fw-bold">نسخة احتياطية</span>
+                        </button>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <label class="clean-card p-3 w-100 text-center border mb-0" style="cursor:pointer;">
+                            <i class="bi bi-upload fs-3 text-info d-block mb-1"></i>
+                            <span class="small fw-bold">استعادة نسخة</span>
+                            <input type="file" accept=".json" class="d-none" onchange="importBackupJSON(this)">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Clean Minimal Footer -->
+        <footer class="mt-auto py-3 px-4 border-top text-center small text-secondary">
+            <a href="https://facebook.com/aliakilakotop" target="_blank" class="text-decoration-none fw-bold text-primary">
+                <i class="bi bi-facebook me-1"></i> Developed By : Ali Akila
+            </a>
+        </footer>
+    </main>
+</div>
+
+<!-- ==================== MOBILE BOTTOM NAVIGATION BAR ==================== -->
+<nav class="mobile-bottom-nav">
+    <a href="#" class="mobile-nav-btn active" id="mobNavMy" onclick="switchView('explorer', 'mine'); return false;">
+        <i class="bi bi-shield-lock"></i>خزنتي
+    </a>
+    <a href="#" class="mobile-nav-btn" id="mobNavAll" onclick="switchView('explorer', 'all'); return false;">
+        <i class="bi bi-folder2-open"></i>المجلدات
+    </a>
+    <a href="#" class="mobile-nav-btn" onclick="openFileModal(); return false;">
+        <i class="bi bi-plus-circle-fill text-primary" style="font-size: 1.45rem;"></i>رفع ملف
+    </a>
+    <a href="#" class="mobile-nav-btn" id="mobNavCloud" onclick="switchView('cloud'); return false;">
+        <i class="bi bi-cloud-check"></i>السحابة
+    </a>
+    <a href="#" class="mobile-nav-btn" id="mobNavAudit" onclick="switchView('audit'); return false;">
+        <i class="bi bi-clock-history"></i>السجل
+    </a>
+</nav>
+
+<!-- ==================== MODALS (SIMPLIFIED & RESPONSIVE) ==================== -->
+<!-- Folder Modal -->
+<div class="modal fade" id="folderModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content clean-card border-0">
+            <div class="modal-header border-bottom py-2">
+                <h6 class="modal-title fw-bold" id="folderModalTitle">مجلد جديد</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="folderForm" onsubmit="saveFolder(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="folderIdInput">
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">اسم المجلد</label>
+                        <input type="text" id="folderNameInput" class="form-control" required>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-7">
+                            <label class="form-label small fw-bold">المسار</label>
+                            <select id="folderParentSelect" class="form-select"></select>
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label small fw-bold">رمز PIN (اختياري)</label>
+                            <input type="password" id="folderPinInput" class="form-control" dir="ltr" placeholder="••••">
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="folderLockedCheck" checked onchange="toggleFolderAllowedUsersBox()">
+                            <label class="form-check-label small fw-bold" for="folderLockedCheck">مجلد خاص (لأشخاص محددين فقط)</label>
+                        </div>
+                    </div>
+                    <div id="allowedUsersChecklistWrapper" class="p-2 bg-light rounded border">
+                        <small class="fw-bold d-block mb-1 text-secondary">المصرح لهم بفتح المجلد:</small>
+                        <div id="allowedUsersChecklist" class="row g-1" style="max-height: 120px; overflow-y: auto;"></div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top py-2">
+                    <button type="submit" class="btn btn-primary clean-btn w-100">حفظ المجلد</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- File Modal -->
+<div class="modal fade" id="fileModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content clean-card border-0">
+            <div class="modal-header border-bottom py-2">
+                <h6 class="modal-title fw-bold" id="fileModalTitle">رفع ملف</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="fileForm" onsubmit="saveFile(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="fileIdInput">
+                    <div class="p-3 border rounded-3 bg-light text-center mb-3">
+                        <input type="file" id="realFileInput" class="form-control form-control-sm" onchange="handleFilePick(this)">
+                        <small class="text-secondary d-block mt-1" id="pickedFileStatusText">اختر ملفاً من هاتفك أو جهازك</small>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">اسم الملف</label>
+                        <input type="text" id="fileNameInput" class="form-control" required>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">النوع</label>
+                            <select id="fileTypeInput" class="form-select">
+                                <option value="PDF">PDF</option>
+                                <option value="DOCX">Word</option>
+                                <option value="XLSX">Excel</option>
+                                <option value="IMAGE">صورة</option>
+                                <option value="ZIP">ZIP</option>
+                                <option value="OTHER">آخر</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">المجلد</label>
+                            <select id="fileFolderSelect" class="form-select"></select>
+                        </div>
+                    </div>
+                    <div class="row g-2 mb-2">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">حفظ سحابي في</label>
+                            <select id="fileCloudSyncSelect" class="form-select">
+                                <option value="BOTH">Google Drive + OneDrive</option>
+                                <option value="GDRIVE">Google Drive</option>
+                                <option value="ONEDRIVE">OneDrive</option>
+                                <option value="LOCAL">محلي فقط</option>
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">رمز PIN (اختياري)</label>
+                            <input type="password" id="filePinCodeInput" class="form-control" dir="ltr" placeholder="بدون رمز">
+                        </div>
+                    </div>
+                    <input type="hidden" id="fileSizeInput" value="0.50">
+                </div>
+                <div class="modal-footer border-top py-2">
+                    <button type="submit" class="btn btn-primary clean-btn w-100">حفظ وأرشفة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="fileDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content clean-card border-0">
+            <div class="modal-header border-bottom py-2">
+                <h6 class="modal-title fw-bold">تفاصيل ومعاينة الملف</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="fileDetailsModalBody"></div>
+            <div class="modal-footer border-top py-2">
+                <button type="button" class="btn btn-success clean-btn w-100" id="modalDownloadRealBtn">
+                    <i class="bi bi-download"></i> تحميل الملف
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- User Modal -->
+<div class="modal fade" id="userModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content clean-card border-0">
+            <div class="modal-header border-bottom py-2">
+                <h6 class="modal-title fw-bold" id="userModalTitle">بيانات الموظف</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="userForm" onsubmit="saveUserAccount(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="editUserIdInput">
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">الاسم</label>
+                        <input type="text" id="userNameInput" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">اسم الدخول</label>
+                        <input type="text" id="userUsernameInput" class="form-control form-control-sm" dir="ltr" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">كلمة المرور</label>
+                        <input type="text" id="userPasswordInput" class="form-control form-control-sm" dir="ltr" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">الوظيفة</label>
+                        <input type="text" id="userJobInput" class="form-control form-control-sm" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-bold">الصلاحية</label>
+                        <select id="userRoleTypeInput" class="form-select form-select-sm">
+                            <option value="employee">موظف (ملفاته فقط)</option>
+                            <option value="admin">مدير النظام (Admin)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top py-2">
+                    <button type="submit" class="btn btn-primary clean-btn w-100">حفظ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- PIN Modal -->
+<div class="modal fade" id="pinVerifyModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content clean-card border-0">
+            <div class="modal-body text-center p-4">
+                <i class="bi bi-shield-lock-fill fs-1 text-danger d-block mb-2"></i>
+                <h6 class="fw-bold mb-1">محمي برمز سري</h6>
+                <p class="text-secondary small mb-3" id="pinVerifyTargetLabel"></p>
+                <input type="password" id="pinVerifyInput" class="form-control text-center mb-3" dir="ltr" placeholder="PIN">
+                <button type="button" class="btn btn-danger clean-btn w-100" id="pinVerifySubmitBtn">فتح</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="toast-holder" id="toastContainer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    const STORAGE_KEY = 'ENTERPRISE_ARCHIVE_PORTABLE_V6';
+    const THEME_KEY   = 'ENTERPRISE_ARCHIVE_THEME_MODE';
+    const IDB_NAME    = 'EnterpriseArchiveFilesDB';
+    const IDB_STORE   = 'fileBlobs';
+
+    let pendingPickedFileDataUrl = null;
+    let unlockedSessionItems = new Set();
+
+    function openIndexedDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(IDB_NAME, 1);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE, { keyPath: 'fileId' });
+            };
+            req.onsuccess = () => resolve(req.result);
+            req.onerror = () => reject(req.error);
+        });
+    }
+
+    async function saveFileContentToIDB(fileId, dataUrl) {
+        if (!dataUrl) return;
+        try {
+            const db = await openIndexedDB();
+            db.transaction(IDB_STORE, 'readwrite').objectStore(IDB_STORE).put({ fileId, dataUrl });
+        } catch (e) {}
+    }
+
+    async function getFileContentFromIDB(fileId) {
+        try {
+            const db = await openIndexedDB();
+            return await new Promise((resolve) => {
+                const req = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(fileId);
+                req.onsuccess = () => resolve(req.result ? req.result.dataUrl : null);
+                req.onerror = () => resolve(null);
+            });
+        } catch (e) { return null; }
+    }
+
+    const DEFAULT_DATA = {
+        currentUserId: 'emp_admin',
+        currentFolderId: 'root',
+        viewMode: 'explorer',
+        onlyMyFilesFilter: true,
+        scriptConfig: {
+            siteName: 'أرشيف المؤسسة الرقمي',
+            orgDepartment: 'بوابة الأرشفة السحابية والمحلية المؤمنة',
+            orgLogoUrl: '',
+            strictZeroTrust: true,
+            maintenanceMode: false
+        },
+        users: [
+            { id: 'emp_admin', username: 'admin', password: '123456', name: 'مدير النظام', role: 'Admin', isAdmin: true, color: '#dc2626' },
+            { id: 'emp_1', username: 'ahmed', password: '1234', name: 'أحمد محمد', role: 'مهندس مشاريع', isAdmin: false, color: '#2563eb' },
+            { id: 'emp_2', username: 'sara', password: '1234', name: 'سارة علي', role: 'الموارد البشرية', isAdmin: false, color: '#059669' },
+            { id: 'emp_3', username: 'khaled', password: '1234', name: 'خالد عبدالله', role: 'المالية', isAdmin: false, color: '#d97706' }
+        ],
+        folders: [
+            { id: 'fld_eng', name: 'المخططات الهندسية', parentId: 'root', ownerId: 'emp_1', isLocked: true, pinCode: '', allowedUserIds: ['emp_1'], createdAt: '2026-10-28 09:15' },
+            { id: 'fld_hr', name: 'عقود الموظفين', parentId: 'root', ownerId: 'emp_2', isLocked: true, pinCode: '1234', allowedUserIds: ['emp_2'], createdAt: '2026-10-29 11:30' },
+            { id: 'fld_fin', name: 'التقارير المالية', parentId: 'root', ownerId: 'emp_3', isLocked: true, pinCode: '', allowedUserIds: ['emp_3'], createdAt: '2026-10-30 14:05' }
+        ],
+        files: [
+            { id: 'file_101', name: 'المواصفات_الفنية_للمشروع.pdf', type: 'PDF', sizeMB: 4.2, folderId: 'fld_eng', ownerId: 'emp_1', privacyMode: 'STRICT_OWNER', pinCode: '', cloudProvider: 'BOTH', updatedAt: '2026-11-01 13:10', version: 2 },
+            { id: 'file_102', name: 'مسير_الرواتب_2026.xlsx', type: 'XLSX', sizeMB: 1.8, folderId: 'fld_hr', ownerId: 'emp_2', privacyMode: 'STRICT_OWNER', pinCode: '1234', cloudProvider: 'GDRIVE', updatedAt: '2026-10-29 12:00', version: 1 },
+            { id: 'file_103', name: 'الميزانية_الربعية.xlsx', type: 'XLSX', sizeMB: 2.9, folderId: 'fld_fin', ownerId: 'emp_3', privacyMode: 'STRICT_OWNER', pinCode: '', cloudProvider: 'ONEDRIVE', updatedAt: '2026-11-02 09:12', version: 1 }
+        ],
+        auditLogs: [
+            { id: 'l1', timestamp: '2026-11-01 13:10', userId: 'emp_1', action: 'CREATE_FILE', targetName: 'المواصفات_الفنية_للمشروع.pdf', details: 'رفع وأرشفة سحابية' }
+        ]
+    };
+
+    let appState = (function() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return JSON.parse(JSON.stringify(DEFAULT_DATA));
+    })();
+
+    function saveState() {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+    }
+
+    function getFormattedNow() {
+        const d = new Date();
+        return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+    }
+
+    function getUserById(id) {
+        return appState.users.find(u => u.id === id) || { id: '0', name: 'مستخدم', role: '-', isAdmin: false, color: '#64748b' };
+    }
+    function getCurrentUser() { return getUserById(appState.currentUserId); }
+    function isCurrentUserAdmin() { return Boolean(getCurrentUser().isAdmin); }
+    function getFolderById(id) {
+        return appState.folders.find(f => f.id === id) || { id: 'root', name: 'الرئيسية', isLocked: false };
+    }
+
+    function showToast(msg) {
+        const c = document.getElementById('toastContainer');
+        const id = 't_' + Date.now();
+        c.insertAdjacentHTML('beforeend', `
+            <div id="${id}" class="clean-card px-3 py-2 mb-2 shadow-sm d-flex align-items-center gap-2 small fw-bold">
+                <i class="bi bi-check-circle-fill text-primary"></i> <span>${msg}</span>
+            </div>
+        `);
+        setTimeout(() => { const el = document.getElementById(id); if (el) el.remove(); }, 3000);
+    }
+
+    function addAuditLog(action, targetName, details) {
+        appState.auditLogs.unshift({ id: 'l_' + Date.now(), timestamp: getFormattedNow(), userId: appState.currentUserId, action, targetName, details });
+        saveState();
+    }
+
+    /* Theme */
+    function applyTheme(mode) {
+        const isDark = mode === 'dark';
+        document.body.classList.toggle('dark-mode', isDark);
+        document.documentElement.setAttribute('data-bs-theme', isDark ? 'dark' : 'light');
+        document.getElementById('themeToggleIcon').className = isDark ? 'bi bi-sun-fill text-warning' : 'bi bi-moon-stars-fill text-primary';
+        localStorage.setItem(THEME_KEY, mode);
+    }
+    function toggleTheme() {
+        applyTheme(localStorage.getItem(THEME_KEY) === 'dark' ? 'light' : 'dark');
+    }
+
+    /* Auth & Permissions */
+    function canUserModifyItem(ownerId) { return isCurrentUserAdmin() || appState.currentUserId === ownerId; }
+    function canUserAccessFolder(fld) {
+        if (!fld || fld.id === 'root' || isCurrentUserAdmin() || fld.ownerId === appState.currentUserId) return true;
+        if (fld.isLocked || (appState.scriptConfig && appState.scriptConfig.strictZeroTrust)) {
+            return Array.isArray(fld.allowedUserIds) && fld.allowedUserIds.includes(appState.currentUserId);
+        }
+        return true;
+    }
+    function canUserViewFile(file) {
+        if (!file) return false;
+        if (isCurrentUserAdmin() || file.ownerId === appState.currentUserId) return true;
+        return canUserAccessFolder(getFolderById(file.folderId));
+    }
+
+    function showFullLoginScreen() {
+        unlockedSessionItems.clear();
+        document.getElementById('fullLoginOverlay').classList.remove('d-none');
+    }
+
+    function quickFillLogin(u, p) {
+        document.getElementById('fullLoginUsername').value = u;
+        document.getElementById('fullLoginPassword').value = p;
+        handleFullLoginSubmit(new Event('submit'));
+    }
+
+    function handleFullLoginSubmit(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const u = document.getElementById('fullLoginUsername').value.trim().toLowerCase();
+        const p = document.getElementById('fullLoginPassword').value.trim();
+        const user = appState.users.find(x => (x.username || '').toLowerCase() === u && x.password === p);
+        if (!user) { showToast('بيانات الدخول غير صحيحة'); return; }
+        document.getElementById('fullLoginOverlay').classList.add('d-none');
+        appState.currentUserId = user.id;
+        appState.currentFolderId = 'root';
+        switchView('explorer', user.isAdmin ? 'all' : 'mine');
+        renderAll();
+        showToast(`مرحباً ${user.name}`);
+    }
+
+    function changeCurrentUser(uid) {
+        unlockedSessionItems.clear();
+        appState.currentUserId = uid;
+        appState.currentFolderId = 'root';
+        const u = getCurrentUser();
+        switchView('explorer', u.isAdmin ? 'all' : 'mine');
+        renderAll();
+    }
+
+    function toggleSidebar() {
+        document.getElementById('appSidebar').classList.toggle('show');
+        document.getElementById('sidebarBackdrop').classList.toggle('show');
+    }
+
+    function switchView(view, sub = 'all') {
+        appState.viewMode = view;
+        appState.onlyMyFilesFilter = (sub === 'mine');
+
+        document.querySelectorAll('.side-nav .nav-link, .mobile-nav-btn').forEach(el => el.classList.remove('active'));
+        if (view === 'explorer' && sub === 'mine') {
+            document.getElementById('navMyFiles').classList.add('active');
+            document.getElementById('mobNavMy').classList.add('active');
+        } else if (view === 'explorer') {
+            document.getElementById('navAllFiles').classList.add('active');
+            document.getElementById('mobNavAll').classList.add('active');
+        } else if (view === 'cloud') {
+            document.getElementById('navCloudDrive').classList.add('active');
+            document.getElementById('mobNavCloud').classList.add('active');
+        } else if (view === 'users') {
+            document.getElementById('navUsersItem').classList.add('active');
+        } else if (view === 'audit') {
+            document.getElementById('navAuditLog').classList.add('active');
+            document.getElementById('mobNavAudit').classList.add('active');
+        } else if (view === 'settings') {
+            document.getElementById('navSettingsItem').classList.add('active');
+        } else if (view === 'server') {
+            document.getElementById('navServerSetup').classList.add('active');
+        }
+
+        ['Explorer','CloudDrive','Users','Audit','Settings','Server'].forEach(v => {
+            const el = document.getElementById('view' + v);
+            if (el) el.classList.add('d-none');
+        });
+
+        const map = { explorer: 'viewExplorer', cloud: 'viewCloudDrive', users: 'viewUsers', audit: 'viewAudit', settings: 'viewSettings', server: 'viewServer' };
+        document.getElementById(map[view]).classList.remove('d-none');
+
+        document.getElementById('appSidebar').classList.remove('show');
+        document.getElementById('sidebarBackdrop').classList.remove('show');
+
+        renderAll();
+    }
+
+    function promptPinVerification(title, pin, cb) {
+        if (!pin) return cb();
+        document.getElementById('pinVerifyTargetLabel').textContent = title;
+        const inp = document.getElementById('pinVerifyInput');
+        inp.value = '';
+        const modal = new bootstrap.Modal(document.getElementById('pinVerifyModal'));
+        document.getElementById('pinVerifySubmitBtn').onclick = () => {
+            if (inp.value.trim() === pin) { modal.hide(); cb(); }
+            else showToast('رمز PIN غير صحيح');
+        };
+        modal.show();
+    }
+
+    function navigateToFolder(fid) {
+        if (fid !== 'root') {
+            const fld = getFolderById(fid);
+            if (!canUserAccessFolder(fld)) { showToast('غير مصرح لك بفتح هذا المجلد'); return; }
+            if (fld.pinCode && !unlockedSessionItems.has(fld.id)) {
+                promptPinVerification(fld.name, fld.pinCode, () => {
+                    unlockedSessionItems.add(fld.id);
+                    appState.currentFolderId = fid;
+                    appState.onlyMyFilesFilter = false;
+                    renderExplorer();
+                });
+                return;
+            }
+        }
+        appState.currentFolderId = fid;
+        if (fid !== 'root') appState.onlyMyFilesFilter = false;
+        renderExplorer();
+    }
+
+    function getFileIconMeta(t) {
+        const m = {
+            PDF: { icon: 'bi-file-earmark-pdf-fill', css: 'icon-pdf' },
+            DOCX: { icon: 'bi-file-earmark-word-fill', css: 'icon-doc' },
+            XLSX: { icon: 'bi-file-earmark-excel-fill', css: 'icon-xls' },
+            IMAGE: { icon: 'bi-file-earmark-image-fill', css: 'icon-img' },
+            ZIP: { icon: 'bi-file-earmark-zip-fill', css: 'icon-zip' }
+        };
+        return m[t] || { icon: 'bi-file-earmark-text-fill', css: 'icon-other' };
+    }
+
+    /* Render Explorer */
+    function renderExplorer() {
+        const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
+        const tf = document.getElementById('filterTypeSelect').value;
+
+        // Breadcrumb
+        const bc = document.getElementById('folderBreadcrumb');
+        if (appState.onlyMyFilesFilter) {
+            bc.innerHTML = `<li class="breadcrumb-item active fw-bold text-primary"><i class="bi bi-shield-lock me-1"></i>ملفاتي الخاصة</li>`;
+        } else {
+            const curr = getFolderById(appState.currentFolderId);
+            bc.innerHTML = `
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none" onclick="navigateToFolder('root');return false;">الرئيسية</a></li>
+                ${curr.id !== 'root' ? `<li class="breadcrumb-item active fw-bold">${curr.name}</li>` : ''}
+            `;
+        }
+
+        // Folders
+        const folders = appState.folders.filter(f => {
+            if (!canUserAccessFolder(f)) return false;
+            if (appState.onlyMyFilesFilter && f.ownerId !== appState.currentUserId && !isCurrentUserAdmin()) return false;
+            if (!appState.onlyMyFilesFilter && !q && f.parentId !== appState.currentFolderId) return false;
+            if (q && !f.name.toLowerCase().includes(q)) return false;
+            return true;
+        });
+
+        const fg = document.getElementById('foldersGridContainer');
+        fg.innerHTML = folders.map(f => {
+            const canMod = canUserModifyItem(f.ownerId);
+            return `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="clean-card folder-item" onclick="navigateToFolder('${f.id}')">
+                        <div class="d-flex align-items-center gap-2 overflow-hidden">
+                            <i class="bi bi-folder-fill ${f.pinCode ? 'text-danger' : 'text-warning'} fs-4 flex-shrink-0"></i>
+                            <div class="overflow-hidden">
+                                <div class="fw-bold small text-truncate">${f.name}</div>
+                                <small class="text-secondary" style="font-size:0.7rem;">${f.isLocked ? 'خاص' : 'مشترك'}</small>
+                            </div>
+                        </div>
+                        ${canMod ? `
+                            <button class="btn btn-sm btn-light p-1" onclick="event.stopPropagation();openFolderModal('${f.id}')">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Files
+        const files = appState.files.filter(f => {
+            if (!canUserViewFile(f)) return false;
+            if (appState.onlyMyFilesFilter && f.ownerId !== appState.currentUserId && !isCurrentUserAdmin()) return false;
+            if (!appState.onlyMyFilesFilter && !q && tf === 'ALL' && f.folderId !== appState.currentFolderId) return false;
+            if (tf !== 'ALL' && f.type !== tf) return false;
+            if (q && !f.name.toLowerCase().includes(q)) return false;
+            return true;
+        });
+
+        document.getElementById('visibleFilesCounter').textContent = files.length;
+        const fc = document.getElementById('filesListContainer');
+
+        if (files.length === 0) {
+            fc.innerHTML = `<div class="p-4 text-center text-secondary small">لا توجد ملفات هنا</div>`;
+        } else {
+            fc.innerHTML = files.map(f => {
+                const ic = getFileIconMeta(f.type);
+                const owner = getUserById(f.ownerId);
+                const canMod = canUserModifyItem(f.ownerId);
+                return `
+                    <div class="file-item">
+                        <div class="d-flex align-items-center gap-2 overflow-hidden" style="cursor:pointer;" onclick="openFileDetails('${f.id}')">
+                            <div class="icon-sq ${ic.css}"><i class="bi ${ic.icon}"></i></div>
+                            <div class="overflow-hidden">
+                                <div class="fw-bold small text-truncate">
+                                    ${f.name}
+                                    ${f.pinCode ? '<i class="bi bi-lock-fill text-danger ms-1"></i>' : ''}
+                                </div>
+                                <div class="text-secondary d-flex align-items-center gap-2" style="font-size:0.72rem;">
+                                    <span>${owner.name}</span> • <span>${Number(f.sizeMB).toFixed(1)} MB</span>
+                                    ${f.cloudProvider && f.cloudProvider !== 'LOCAL' ? '<span class="text-success"><i class="bi bi-cloud-check-fill"></i></span>' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                            <button class="btn btn-sm btn-light border" onclick="downloadRealOrSimulatedFile('${f.id}')" title="تحميل"><i class="bi bi-download text-success"></i></button>
+                            ${canMod ? `
+                                <button class="btn btn-sm btn-light border" onclick="openFileModal('${f.id}')" title="تعديل"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-light border text-danger" onclick="deleteFileNow('${f.id}')" title="حذف"><i class="bi bi-trash"></i></button>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        const myCount = appState.files.filter(f => f.ownerId === appState.currentUserId).length;
+        document.getElementById('statTotalFolders').textContent = folders.length;
+        document.getElementById('statMyFiles').textContent = myCount;
+        document.getElementById('myFilesCountBadge').textContent = myCount;
+    }
+
+    /* Folder CRUD */
+    function populateFolderDropdowns(sel) {
+        const list = appState.folders.filter(f => canUserAccessFolder(f));
+        const html = `<option value="root">الرئيسية</option>` + list.map(f => `<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${f.name}</option>`).join('');
+        document.getElementById('folderParentSelect').innerHTML = html;
+        document.getElementById('fileFolderSelect').innerHTML = html;
+    }
+
+    function toggleFolderAllowedUsersBox() {
+        document.getElementById('allowedUsersChecklistWrapper').classList.toggle('d-none', !document.getElementById('folderLockedCheck').checked);
+    }
+
+    function openFolderModal(editId = null) {
+        populateFolderDropdowns(appState.currentFolderId);
+        const box = document.getElementById('allowedUsersChecklist');
+        const folder = editId ? appState.folders.find(f => f.id === editId) : null;
+        const selectedIds = folder ? (folder.allowedUserIds || []) : [appState.currentUserId];
+
+        box.innerHTML = appState.users.map(u => {
+            const chk = selectedIds.includes(u.id) || u.id === appState.currentUserId || u.isAdmin;
+            return `
+                <div class="col-6">
+                    <div class="form-check small">
+                        <input class="form-check-input folder-allowed-user-chk" type="checkbox" value="${u.id}" id="u_${u.id}" ${chk ? 'checked' : ''}>
+                        <label class="form-check-label" for="u_${u.id}">${u.name}</label>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        if (folder) {
+            document.getElementById('folderIdInput').value = folder.id;
+            document.getElementById('folderNameInput').value = folder.name;
+            document.getElementById('folderParentSelect').value = folder.parentId || 'root';
+            document.getElementById('folderPinInput').value = folder.pinCode || '';
+            document.getElementById('folderLockedCheck').checked = Boolean(folder.isLocked);
+        } else {
+            document.getElementById('folderForm').reset();
+            document.getElementById('folderIdInput').value = '';
+            document.getElementById('folderLockedCheck').checked = true;
+        }
+        toggleFolderAllowedUsersBox();
+        new bootstrap.Modal(document.getElementById('folderModal')).show();
+    }
+
+    function saveFolder(e) {
+        e.preventDefault();
+        const id = document.getElementById('folderIdInput').value;
+        const name = document.getElementById('folderNameInput').value.trim();
+        const parentId = document.getElementById('folderParentSelect').value;
+        const pinCode = document.getElementById('folderPinInput').value.trim();
+        const isLocked = document.getElementById('folderLockedCheck').checked;
+        const allowed = Array.from(document.querySelectorAll('.folder-allowed-user-chk:checked')).map(x => x.value);
+
+        if (id) {
+            const f = appState.folders.find(x => x.id === id);
+            if (f) { f.name = name; f.parentId = parentId; f.pinCode = pinCode; f.isLocked = isLocked; f.allowedUserIds = allowed; }
+        } else {
+            appState.folders.push({ id: 'fld_' + Date.now(), name, parentId, ownerId: appState.currentUserId, isLocked, pinCode, allowedUserIds: allowed, createdAt: getFormattedNow() });
+        }
+        saveState();
+        bootstrap.Modal.getInstance(document.getElementById('folderModal')).hide();
+        renderExplorer();
+        showToast('تم حفظ المجلد');
+    }
+
+    /* File CRUD */
+    function handleFilePick(inp) {
+        if (!inp.files || !inp.files[0]) return;
+        const file = inp.files[0];
+        document.getElementById('fileNameInput').value = file.name;
+        document.getElementById('fileSizeInput').value = Math.max(0.1, (file.size / (1024 * 1024))).toFixed(2);
+        const ext = file.name.split('.').pop().toLowerCase();
+        const sel = document.getElementById('fileTypeInput');
+        if (ext === 'pdf') sel.value = 'PDF';
+        else if (['doc','docx','txt'].includes(ext)) sel.value = 'DOCX';
+        else if (['xls','xlsx','csv'].includes(ext)) sel.value = 'XLSX';
+        else if (['png','jpg','jpeg','webp'].includes(ext)) sel.value = 'IMAGE';
+        else if (['zip','rar'].includes(ext)) sel.value = 'ZIP';
+
+        const r = new FileReader();
+        r.onload = (ev) => {
+            pendingPickedFileDataUrl = ev.target.result;
+            document.getElementById('pickedFileStatusText').textContent = 'تم تجهيز الملف للحفظ';
+        };
+        r.readAsDataURL(file);
+    }
+
+    function openFileModal(editId = null) {
+        pendingPickedFileDataUrl = null;
+        populateFolderDropdowns(appState.currentFolderId);
+        if (editId) {
+            const f = appState.files.find(x => x.id === editId);
+            if (!f) return;
+            document.getElementById('fileIdInput').value = f.id;
+            document.getElementById('fileNameInput').value = f.name;
+            document.getElementById('fileTypeInput').value = f.type;
+            document.getElementById('fileFolderSelect').value = f.folderId;
+            document.getElementById('fileCloudSyncSelect').value = f.cloudProvider || 'BOTH';
+            document.getElementById('filePinCodeInput').value = f.pinCode || '';
+        } else {
+            document.getElementById('fileForm').reset();
+            document.getElementById('fileIdInput').value = '';
+            document.getElementById('fileFolderSelect').value = appState.currentFolderId;
+        }
+        new bootstrap.Modal(document.getElementById('fileModal')).show();
+    }
+
+    async function saveFile(e) {
+        e.preventDefault();
+        const id = document.getElementById('fileIdInput').value;
+        const name = document.getElementById('fileNameInput').value.trim();
+        const type = document.getElementById('fileTypeInput').value;
+        const folderId = document.getElementById('fileFolderSelect').value;
+        const cloudProvider = document.getElementById('fileCloudSyncSelect').value;
+        const pinCode = document.getElementById('filePinCodeInput').value.trim();
+        const sizeMB = parseFloat(document.getElementById('fileSizeInput').value) || 0.5;
+
+        if (id) {
+            const f = appState.files.find(x => x.id === id);
+            if (f) {
+                f.name = name; f.type = type; f.folderId = folderId; f.cloudProvider = cloudProvider; f.pinCode = pinCode;
+                f.updatedAt = getFormattedNow();
+                if (pendingPickedFileDataUrl) await saveFileContentToIDB(f.id, pendingPickedFileDataUrl);
+                addAuditLog('UPDATE_FILE', name, 'تحديث الملف');
+            }
+        } else {
+            const newId = 'file_' + Date.now();
+            appState.files.unshift({
+                id: newId, name, type, sizeMB, folderId, ownerId: appState.currentUserId,
+                privacyMode: 'STRICT_OWNER', pinCode, cloudProvider, updatedAt: getFormattedNow(), version: 1
+            });
+            if (pendingPickedFileDataUrl) await saveFileContentToIDB(newId, pendingPickedFileDataUrl);
+            addAuditLog('CREATE_FILE', name, 'رفع ملف جديد');
+        }
+        saveState();
+        bootstrap.Modal.getInstance(document.getElementById('fileModal')).hide();
+        renderExplorer();
+        showToast('تم حفظ الملف');
+    }
+
+    function deleteFileNow(fid) {
+        const f = appState.files.find(x => x.id === fid);
+        if (!f || !canUserModifyItem(f.ownerId)) return;
+        appState.files = appState.files.filter(x => x.id !== fid);
+        saveState();
+        renderExplorer();
+        showToast('تم حذف الملف');
+    }
+
+    async function openFileDetails(fid) {
+        const f = appState.files.find(x => x.id === fid);
+        if (!f || !canUserViewFile(f)) return;
+        if (f.pinCode && !unlockedSessionItems.has(f.id)) {
+            promptPinVerification(f.name, f.pinCode, () => { unlockedSessionItems.add(f.id); openFileDetails(fid); });
+            return;
+        }
+        const dataUrl = await getFileContentFromIDB(f.id);
+        const owner = getUserById(f.ownerId);
+        let prev = `<div class="p-3 bg-light rounded text-center small text-secondary mb-3">معاينة آمنة للملف</div>`;
+        if (dataUrl && (f.type === 'IMAGE' || dataUrl.startsWith('data:image/'))) {
+            prev = `<div class="watermark-box text-center mb-3" data-watermark="${getCurrentUser().name}"><img src="${dataUrl}" class="img-fluid rounded" style="max-height:240px;"></div>`;
+        }
+        document.getElementById('fileDetailsModalBody').innerHTML = `
+            ${prev}
+            <div class="small">
+                <div class="d-flex justify-content-between py-1 border-bottom"><span>الاسم:</span><strong>${f.name}</strong></div>
+                <div class="d-flex justify-content-between py-1 border-bottom"><span>المالك:</span><strong>${owner.name}</strong></div>
+                <div class="d-flex justify-content-between py-1 border-bottom"><span>التحديث:</span><strong>${f.updatedAt}</strong></div>
+                <div class="d-flex justify-content-between py-1"><span>السحابة:</span><strong>${f.cloudProvider}</strong></div>
+            </div>
+        `;
+        document.getElementById('modalDownloadRealBtn').onclick = () => downloadRealOrSimulatedFile(f.id);
+        new bootstrap.Modal(document.getElementById('fileDetailsModal')).show();
+    }
+
+    async function downloadRealOrSimulatedFile(fid) {
+        const f = appState.files.find(x => x.id === fid);
+        if (!f || !canUserViewFile(f)) return;
+        if (f.pinCode && !unlockedSessionItems.has(f.id)) {
+            promptPinVerification(f.name, f.pinCode, () => { unlockedSessionItems.add(f.id); downloadRealOrSimulatedFile(fid); });
+            return;
+        }
+        const dataUrl = await getFileContentFromIDB(f.id);
+        const a = document.createElement('a');
+        if (dataUrl) {
+            a.href = dataUrl; a.download = f.name;
+        } else {
+            const blob = new Blob([`File: ${f.name}\nDate: ${f.updatedAt}`], { type: 'text/plain;charset=utf-8' });
+            a.href = URL.createObjectURL(blob); a.download = f.name + '.txt';
+        }
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        showToast('جاري التحميل...');
+    }
+
+    /* Cloud Center */
+    function renderCloudDriveCenter() {
+        const list = appState.files.filter(f => canUserViewFile(f));
+        document.getElementById('cloudFilesListContainer').innerHTML = list.map(f => `
+            <div class="file-item">
+                <div class="overflow-hidden">
+                    <div class="fw-bold small text-truncate">${f.name}</div>
+                    <small class="text-secondary">${f.cloudProvider === 'BOTH' ? 'Google Drive + OneDrive' : f.cloudProvider}</small>
+                </div>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-outline-success" onclick="syncSingleFileToCloud('${f.id}','GDRIVE')"><i class="bi bi-google"></i></button>
+                    <button class="btn btn-sm btn-outline-primary" onclick="syncSingleFileToCloud('${f.id}','ONEDRIVE')"><i class="bi bi-microsoft"></i></button>
+                </div>
+            </div>
+        `).join('');
+    }
+    function syncSingleFileToCloud(fid, prov) {
+        const f = appState.files.find(x => x.id === fid);
+        if (f) { f.cloudProvider = prov; addAuditLog('CLOUD_SYNC', f.name, `مزامنة إلى ${prov}`); saveState(); renderCloudDriveCenter(); showToast('تمت المزامنة السحابية'); }
+    }
+    function bulkSyncCurrentUserFiles(prov) {
+        appState.files.filter(f => canUserViewFile(f)).forEach(f => f.cloudProvider = prov);
+        saveState(); renderCloudDriveCenter(); showToast('تمت مزامنة جميع ملفاتك سحابياً');
+    }
+    function saveCloudProviderConfig() { showToast('تم حفظ إعدادات الربط السحابي'); }
+
+    /* Users */
+    function renderUsersManagement() {
+        const isAdmin = isCurrentUserAdmin();
+        const c = document.getElementById('usersCardsContainer');
+        c.innerHTML = appState.users.map(u => `
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="clean-card p-3 d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="avatar-sm" style="background:${u.color}">${u.name.charAt(0)}</div>
+                        <div>
+                            <div class="fw-bold small">${u.name}</div>
+                            <small class="text-secondary">${u.role} (${u.username})</small>
+                        </div>
+                    </div>
+                    ${isAdmin ? `<button class="btn btn-sm btn-light border" onclick="openUserModal('${u.id}')"><i class="bi bi-pencil"></i></button>` : ''}
+                </div>
+            </div>
+        `).join('');
+    }
+    function openUserModal(uid = null) {
+        if (!isCurrentUserAdmin()) return;
+        if (uid) {
+            const u = getUserById(uid);
+            document.getElementById('editUserIdInput').value = u.id;
+            document.getElementById('userNameInput').value = u.name;
+            document.getElementById('userUsernameInput').value = u.username;
+            document.getElementById('userPasswordInput').value = u.password;
+            document.getElementById('userJobInput').value = u.role;
+            document.getElementById('userRoleTypeInput').value = u.isAdmin ? 'admin' : 'employee';
+        } else {
+            document.getElementById('userForm').reset();
+            document.getElementById('editUserIdInput').value = '';
+        }
+        new bootstrap.Modal(document.getElementById('userModal')).show();
+    }
+    function saveUserAccount(e) {
+        e.preventDefault();
+        const id = document.getElementById('editUserIdInput').value;
+        const name = document.getElementById('userNameInput').value.trim();
+        const username = document.getElementById('userUsernameInput').value.trim();
+        const password = document.getElementById('userPasswordInput').value.trim();
+        const role = document.getElementById('userJobInput').value.trim();
+        const isAdmin = document.getElementById('userRoleTypeInput').value === 'admin';
+        if (id) {
+            const u = appState.users.find(x => x.id === id);
+            if (u) { u.name = name; u.username = username; u.password = password; u.role = role; u.isAdmin = isAdmin; }
+        } else {
+            appState.users.push({ id: 'emp_' + Date.now(), name, username, password, role, isAdmin, color: '#2563eb' });
+        }
+        saveState();
+        bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
+        renderAll();
+        showToast('تم حفظ بيانات الموظف');
+    }
+
+    /* Audit */
+    function renderAuditLog() {
+        const flt = document.getElementById('auditFilterAction').value;
+        const logs = appState.auditLogs.filter(l => (isCurrentUserAdmin() || l.userId === appState.currentUserId) && (flt === 'ALL' || l.action === flt));
+        document.getElementById('auditListContainer').innerHTML = logs.map(l => {
+            const u = getUserById(l.userId);
+            return `
+                <div class="file-item">
+                    <div>
+                        <div class="fw-bold small">${l.targetName}</div>
+                        <small class="text-secondary">${u.name} • ${l.details}</small>
+                    </div>
+                    <span class="badge bg-light text-secondary border">${l.timestamp}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    /* Settings & Package */
+    function saveScriptSettings(e) {
+        e.preventDefault();
+        appState.scriptConfig.siteName = document.getElementById('cfgSiteName').value.trim();
+        appState.scriptConfig.orgDepartment = document.getElementById('cfgOrgDepartment').value.trim();
+        appState.scriptConfig.orgLogoUrl = document.getElementById('cfgOrgLogoUrl').value.trim();
+        appState.scriptConfig.strictZeroTrust = document.getElementById('cfgStrictZeroTrust').checked;
+        appState.scriptConfig.maintenanceMode = document.getElementById('cfgMaintenanceMode').checked;
+        saveState(); renderAll(); showToast('تم حفظ الإعدادات');
+    }
+
+    function downloadTextFile(name, text) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
+        a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+    function downloadPhpApiFile() { downloadTextFile('api.php', '<?php // Enterprise Archive API v7.0 - Developed By Ali Akila ?>'); }
+    function downloadSqlSchemaFile() { downloadTextFile('database.sql', '-- Enterprise Archive SQL Schema v7.0'); }
+    function exportBackupJSON() { downloadTextFile('Archive_Backup.json', JSON.stringify(appState, null, 2)); }
+    function importBackupJSON(inp) {
+        if (!inp.files[0]) return;
+        const r = new FileReader();
+        r.onload = (e) => { try { appState = JSON.parse(e.target.result); saveState(); renderAll(); showToast('تمت الاستعادة'); } catch(err){} };
+        r.readAsText(inp.files[0]);
+    }
+
+    function renderAll() {
+        const u = getCurrentUser();
+        const isAdmin = Boolean(u.isAdmin);
+        const cfg = appState.scriptConfig || DEFAULT_DATA.scriptConfig;
+
+        document.getElementById('loginPortalOrgName').textContent = cfg.siteName;
+        document.getElementById('topNavbarSystemTitle').textContent = cfg.siteName;
+        document.getElementById('sidebarOrgTitle').textContent = cfg.siteName;
+        document.getElementById('cfgSiteName').value = cfg.siteName;
+        document.getElementById('cfgOrgDepartment').value = cfg.orgDepartment || '';
+
+        document.getElementById('sidebarUserAvatar').textContent = u.name.charAt(0);
+        document.getElementById('sidebarUserAvatar').style.backgroundColor = u.color;
+        document.getElementById('sidebarUserName').textContent = u.name;
+        document.getElementById('sidebarUserRole').textContent = u.role;
+        document.getElementById('roleBannerBadge').textContent = isAdmin ? 'لوحة الإدارة الشاملة' : `خزنة: ${u.name}`;
+
+        document.getElementById('navUsersItem').classList.toggle('d-none', !isAdmin);
+        document.getElementById('navSettingsItem').classList.toggle('d-none', !isAdmin);
+
+        document.getElementById('userSwitcherSelect').innerHTML = appState.users.map(x => `<option value="${x.id}" ${x.id === u.id ? 'selected' : ''}>${x.name}</option>`).join('');
+
+        const totalMB = appState.files.filter(f => canUserViewFile(f)).reduce((s, f) => s + Number(f.sizeMB || 0), 0);
+        document.getElementById('storageUsedText').textContent = `${totalMB.toFixed(1)} MB`;
+
+        renderExplorer();
+        renderCloudDriveCenter();
+        renderUsersManagement();
+        renderAuditLog();
+    }
+
+    window.onload = () => {
+        applyTheme(localStorage.getItem(THEME_KEY) || 'light');
+        renderAll();
+        showFullLoginScreen();
+    };
+</script>
+</body>
+</html>
