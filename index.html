@@ -321,23 +321,12 @@
                 <label class="form-label small fw-bold">كلمة المرور</label>
                 <input type="password" id="fullLoginPassword" class="form-control" dir="ltr" placeholder="••••••••" required>
             </div>
-            <button type="submit" class="btn btn-primary clean-btn w-100 py-2 mb-3">
+            <button type="submit" class="btn btn-primary clean-btn w-100 py-2 mb-2">
                 <i class="bi bi-box-arrow-in-left"></i> تسجيل الدخول
             </button>
         </form>
 
-        <!-- Fast Switch Pills for Demo -->
-        <div class="pt-3 border-top">
-            <small class="text-secondary d-block mb-2">دخول سريع للتجربة:</small>
-            <div class="d-flex flex-wrap justify-content-center gap-1">
-                <button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="quickFillLogin('admin','123456')">المدير</button>
-                <button class="btn btn-sm btn-outline-primary py-1 px-2" onclick="quickFillLogin('ahmed','1234')">أحمد</button>
-                <button class="btn btn-sm btn-outline-success py-1 px-2" onclick="quickFillLogin('sara','1234')">سارة</button>
-                <button class="btn btn-sm btn-outline-warning text-dark py-1 px-2" onclick="quickFillLogin('khaled','1234')">خالد</button>
-            </div>
-        </div>
-
-        <div class="mt-4 pt-2 border-top small">
+        <div class="mt-4 pt-3 border-top small">
             <a href="https://facebook.com/aliakilakotop" target="_blank" class="text-decoration-none fw-bold text-primary">
                 Developed By : Ali Akila
             </a>
@@ -376,25 +365,26 @@
             </a>
             <a href="#" class="nav-link" id="navAllFiles" onclick="switchView('explorer', 'all'); return false;">
                 <i class="bi bi-folder2-open"></i>
-                <span>المجلدات</span>
+                <span>المجلدات المخصصة</span>
             </a>
-            <a href="#" class="nav-link" id="navCloudDrive" onclick="switchView('cloud'); return false;">
+            <!-- Admin Only Items -->
+            <a href="#" class="nav-link d-none" id="navCloudDrive" onclick="switchView('cloud'); return false;">
                 <i class="bi bi-cloud-check"></i>
                 <span>السحابة (Drive)</span>
             </a>
-            <a href="#" class="nav-link" id="navUsersItem" onclick="switchView('users'); return false;">
+            <a href="#" class="nav-link d-none" id="navUsersItem" onclick="switchView('users'); return false;">
                 <i class="bi bi-people"></i>
-                <span>الموظفون</span>
+                <span>إدارة الموظفين</span>
             </a>
             <a href="#" class="nav-link" id="navAuditLog" onclick="switchView('audit'); return false;">
                 <i class="bi bi-clock-history"></i>
                 <span>السجل</span>
             </a>
-            <a href="#" class="nav-link" id="navSettingsItem" onclick="switchView('settings'); return false;">
+            <a href="#" class="nav-link d-none" id="navSettingsItem" onclick="switchView('settings'); return false;">
                 <i class="bi bi-gear"></i>
                 <span>الإعدادات</span>
             </a>
-            <a href="#" class="nav-link" id="navServerSetup" onclick="switchView('server'); return false;">
+            <a href="#" class="nav-link d-none" id="navServerSetup" onclick="switchView('server'); return false;">
                 <i class="bi bi-code-slash"></i>
                 <span>ملفات السيرفر</span>
             </a>
@@ -423,8 +413,10 @@
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                <!-- Quick User Switcher -->
-                <select id="userSwitcherSelect" class="form-select form-select-sm bg-light fw-bold" style="width: auto; max-width: 155px;" onchange="changeCurrentUser(this.value)"></select>
+                <!-- Quick Button for Admin to Create/Manage Accounts -->
+                <button class="btn btn-outline-primary btn-sm clean-btn py-1 px-2 d-none" id="headerManageUsersBtn" onclick="switchView('users')">
+                    <i class="bi bi-person-plus-fill"></i> <span class="d-none d-sm-inline">إدارة الحسابات</span>
+                </button>
 
                 <!-- Theme Toggle -->
                 <button class="btn btn-light border btn-sm" onclick="toggleTheme()" title="الوضع الليلي / النهاري">
@@ -444,8 +436,9 @@
                         <span class="text-secondary small"><strong id="statTotalFolders">0</strong> مجلد • <strong id="statMyFiles">0</strong> ملف</span>
                     </div>
                     <div class="d-flex gap-2">
-                        <button class="btn btn-light border clean-btn btn-sm" onclick="openFolderModal()">
-                            <i class="bi bi-folder-plus text-warning"></i> <span>مجلد جديد</span>
+                        <!-- Folder creation restricted to Admin -->
+                        <button class="btn btn-light border clean-btn btn-sm d-none" id="btnCreateFolderMain" onclick="openFolderModal()">
+                            <i class="bi bi-folder-plus text-warning"></i> <span>تخصيص مجلد</span>
                         </button>
                         <button class="btn btn-primary clean-btn btn-sm" onclick="openFileModal()">
                             <i class="bi bi-cloud-arrow-up-fill"></i> <span>رفع ملف</span>
@@ -491,7 +484,7 @@
                 </div>
             </div>
 
-            <!-- ==================== VIEW: CLOUD DRIVE (Google Drive & OneDrive) ==================== -->
+            <!-- ==================== VIEW: CLOUD DRIVE (ADMIN ONLY) ==================== -->
             <div id="viewCloudDrive" class="d-none">
                 <div class="row g-3 mb-3">
                     <div class="col-12 col-md-6">
@@ -510,7 +503,7 @@
                             </div>
                             <input type="text" id="gdriveFolderIdInput" class="form-control form-control-sm mb-2" dir="ltr" placeholder="Google Drive Folder ID">
                             <div class="d-flex gap-2">
-                                <button class="btn btn-success btn-sm clean-btn flex-grow-1" onclick="bulkSyncCurrentUserFiles('GDRIVE')">مزامنة ملفاتي</button>
+                                <button class="btn btn-success btn-sm clean-btn flex-grow-1" onclick="bulkSyncCurrentUserFiles('GDRIVE')">مزامنة كل الملفات</button>
                                 <button class="btn btn-light border btn-sm" onclick="saveCloudProviderConfig('GDRIVE')">حفظ</button>
                             </div>
                         </div>
@@ -532,7 +525,7 @@
                             </div>
                             <input type="text" id="onedriveFolderPathInput" class="form-control form-control-sm mb-2" dir="ltr" placeholder="/Enterprise_Archive_Vault">
                             <div class="d-flex gap-2">
-                                <button class="btn btn-primary btn-sm clean-btn flex-grow-1" onclick="bulkSyncCurrentUserFiles('ONEDRIVE')">مزامنة ملفاتي</button>
+                                <button class="btn btn-primary btn-sm clean-btn flex-grow-1" onclick="bulkSyncCurrentUserFiles('ONEDRIVE')">مزامنة كل الملفات</button>
                                 <button class="btn btn-light border btn-sm" onclick="saveCloudProviderConfig('ONEDRIVE')">حفظ</button>
                             </div>
                         </div>
@@ -553,9 +546,12 @@
             <!-- ==================== VIEW: USERS (ADMIN) ==================== -->
             <div id="viewUsers" class="d-none">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h6 class="fw-bold mb-0">حسابات الموظفين</h6>
+                    <div>
+                        <h6 class="fw-bold mb-0">إدارة حسابات الموظفين وتخصيص المجلدات</h6>
+                        <small class="text-secondary">عند إنشاء موظف جديد يتم إنشاء مجلد عمل خاص به تلقائياً</small>
+                    </div>
                     <button class="btn btn-primary btn-sm clean-btn" id="btnAddUserInView" onclick="openUserModal()">
-                        <i class="bi bi-person-plus"></i> إضافة موظف
+                        <i class="bi bi-person-plus-fill"></i> إنشاء حساب ومجلد موظف
                     </button>
                 </div>
                 <div class="row g-2" id="usersCardsContainer"></div>
@@ -571,14 +567,13 @@
                             <option value="CREATE_FILE">رفع ملف</option>
                             <option value="UPDATE_FILE">تعديل</option>
                             <option value="CLOUD_SYNC">مزامنة سحابية</option>
-                            <option value="SECURITY_ALERT">تنبيه أمني</option>
                         </select>
                     </div>
                     <div id="auditListContainer"></div>
                 </div>
             </div>
 
-            <!-- ==================== VIEW: SETTINGS ==================== -->
+            <!-- ==================== VIEW: SETTINGS (ADMIN ONLY) ==================== -->
             <div id="viewSettings" class="d-none">
                 <div class="clean-card p-3 p-md-4 mx-auto" style="max-width: 650px;">
                     <h6 class="fw-bold mb-3">إعدادات المؤسسة والحماية</h6>
@@ -610,7 +605,7 @@
                 </div>
             </div>
 
-            <!-- ==================== VIEW: SERVER PACKAGE ==================== -->
+            <!-- ==================== VIEW: SERVER PACKAGE (ADMIN ONLY) ==================== -->
             <div id="viewServer" class="d-none">
                 <div class="row g-2 mb-3">
                     <div class="col-6 col-md-3">
@@ -655,7 +650,7 @@
 <!-- ==================== MOBILE BOTTOM NAVIGATION BAR ==================== -->
 <nav class="mobile-bottom-nav">
     <a href="#" class="mobile-nav-btn active" id="mobNavMy" onclick="switchView('explorer', 'mine'); return false;">
-        <i class="bi bi-shield-lock"></i>خزنتي
+        <i class="bi bi-shield-lock"></i>ملفاتي
     </a>
     <a href="#" class="mobile-nav-btn" id="mobNavAll" onclick="switchView('explorer', 'all'); return false;">
         <i class="bi bi-folder2-open"></i>المجلدات
@@ -663,8 +658,11 @@
     <a href="#" class="mobile-nav-btn" onclick="openFileModal(); return false;">
         <i class="bi bi-plus-circle-fill text-primary" style="font-size: 1.45rem;"></i>رفع ملف
     </a>
-    <a href="#" class="mobile-nav-btn" id="mobNavCloud" onclick="switchView('cloud'); return false;">
+    <a href="#" class="mobile-nav-btn d-none" id="mobNavCloud" onclick="switchView('cloud'); return false;">
         <i class="bi bi-cloud-check"></i>السحابة
+    </a>
+    <a href="#" class="mobile-nav-btn d-none" id="mobNavUsers" onclick="switchView('users'); return false;">
+        <i class="bi bi-people"></i>الموظفون
     </a>
     <a href="#" class="mobile-nav-btn" id="mobNavAudit" onclick="switchView('audit'); return false;">
         <i class="bi bi-clock-history"></i>السجل
@@ -672,12 +670,12 @@
 </nav>
 
 <!-- ==================== MODALS (SIMPLIFIED & RESPONSIVE) ==================== -->
-<!-- Folder Modal -->
+<!-- Folder Modal (Admin Only) -->
 <div class="modal fade" id="folderModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content clean-card border-0">
             <div class="modal-header border-bottom py-2">
-                <h6 class="modal-title fw-bold" id="folderModalTitle">مجلد جديد</h6>
+                <h6 class="modal-title fw-bold" id="folderModalTitle">إنشاء وتخصيص مجلد</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="folderForm" onsubmit="saveFolder(event)">
@@ -685,7 +683,7 @@
                     <input type="hidden" id="folderIdInput">
                     <div class="mb-2">
                         <label class="form-label small fw-bold">اسم المجلد</label>
-                        <input type="text" id="folderNameInput" class="form-control" required>
+                        <input type="text" id="folderNameInput" class="form-control" placeholder="مثال: فولدر أعمال المهندس إسلام" required>
                     </div>
                     <div class="row g-2 mb-2">
                         <div class="col-7">
@@ -700,16 +698,16 @@
                     <div class="mb-2">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="folderLockedCheck" checked onchange="toggleFolderAllowedUsersBox()">
-                            <label class="form-check-label small fw-bold" for="folderLockedCheck">مجلد خاص (لأشخاص محددين فقط)</label>
+                            <label class="form-check-label small fw-bold" for="folderLockedCheck">مجلد مخصص لموظفين محددين فقط</label>
                         </div>
                     </div>
                     <div id="allowedUsersChecklistWrapper" class="p-2 bg-light rounded border">
-                        <small class="fw-bold d-block mb-1 text-secondary">المصرح لهم بفتح المجلد:</small>
-                        <div id="allowedUsersChecklist" class="row g-1" style="max-height: 120px; overflow-y: auto;"></div>
+                        <small class="fw-bold d-block mb-1 text-secondary">اختر الموظف المسموح له بالعمل على هذا المجلد:</small>
+                        <div id="allowedUsersChecklist" class="row g-1" style="max-height: 140px; overflow-y: auto;"></div>
                     </div>
                 </div>
                 <div class="modal-footer border-top py-2">
-                    <button type="submit" class="btn btn-primary clean-btn w-100">حفظ المجلد</button>
+                    <button type="submit" class="btn btn-primary clean-btn w-100">حفظ وتخصيص المجلد</button>
                 </div>
             </form>
         </div>
@@ -748,12 +746,12 @@
                             </select>
                         </div>
                         <div class="col-6">
-                            <label class="form-label small fw-bold">المجلد</label>
+                            <label class="form-label small fw-bold">الفولدر المخصص</label>
                             <select id="fileFolderSelect" class="form-select"></select>
                         </div>
                     </div>
                     <div class="row g-2 mb-2">
-                        <div class="col-6">
+                        <div class="col-6 d-none" id="fileCloudSyncWrapper">
                             <label class="form-label small fw-bold">حفظ سحابي في</label>
                             <select id="fileCloudSyncSelect" class="form-select">
                                 <option value="BOTH">Google Drive + OneDrive</option>
@@ -762,8 +760,8 @@
                                 <option value="LOCAL">محلي فقط</option>
                             </select>
                         </div>
-                        <div class="col-6">
-                            <label class="form-label small fw-bold">رمز PIN (اختياري)</label>
+                        <div class="col-12" id="filePinCodeWrapper">
+                            <label class="form-label small fw-bold">رمز PIN لحماية الملف (اختياري)</label>
                             <input type="password" id="filePinCodeInput" class="form-control" dir="ltr" placeholder="بدون رمز">
                         </div>
                     </div>
@@ -807,31 +805,35 @@
                 <div class="modal-body">
                     <input type="hidden" id="editUserIdInput">
                     <div class="mb-2">
-                        <label class="form-label small fw-bold">الاسم</label>
-                        <input type="text" id="userNameInput" class="form-control form-control-sm" required>
+                        <label class="form-label small fw-bold">اسم الموظف الكامل</label>
+                        <input type="text" id="userNameInput" class="form-control form-control-sm" placeholder="مثال: eslam mohamed" required>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label small fw-bold">اسم الدخول</label>
-                        <input type="text" id="userUsernameInput" class="form-control form-control-sm" dir="ltr" required>
+                        <label class="form-label small fw-bold">اسم المستخدم للدخول</label>
+                        <input type="text" id="userUsernameInput" class="form-control form-control-sm" dir="ltr" placeholder="eslam" required>
                     </div>
                     <div class="mb-2">
                         <label class="form-label small fw-bold">كلمة المرور</label>
-                        <input type="text" id="userPasswordInput" class="form-control form-control-sm" dir="ltr" required>
+                        <input type="text" id="userPasswordInput" class="form-control form-control-sm" dir="ltr" placeholder="••••••" required>
                     </div>
                     <div class="mb-2">
-                        <label class="form-label small fw-bold">الوظيفة</label>
-                        <input type="text" id="userJobInput" class="form-control form-control-sm" required>
+                        <label class="form-label small fw-bold">المسمى الوظيفي / القسم</label>
+                        <input type="text" id="userJobInput" class="form-control form-control-sm" placeholder="مثال: survey" required>
+                    </div>
+                    <div class="mb-2" id="autoCreateFolderBox">
+                        <label class="form-label small fw-bold">اسم الفولدر المخصص للموظف</label>
+                        <input type="text" id="userCustomFolderNameInput" class="form-control form-control-sm" placeholder="يُنشأ تلقائياً باسم الموظف">
                     </div>
                     <div class="mb-2">
-                        <label class="form-label small fw-bold">الصلاحية</label>
+                        <label class="form-label small fw-bold">نوع الصلاحية</label>
                         <select id="userRoleTypeInput" class="form-select form-select-sm">
-                            <option value="employee">موظف (ملفاته فقط)</option>
-                            <option value="admin">مدير النظام (Admin)</option>
+                            <option value="employee">موظف (يعمل على الفولدر المخصص له فقط)</option>
+                            <option value="admin">مدير النظام (صلاحيات كاملة)</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer border-top py-2">
-                    <button type="submit" class="btn btn-primary clean-btn w-100">حفظ</button>
+                    <button type="submit" class="btn btn-primary clean-btn w-100">حفظ الحساب وتخصيص الفولدر</button>
                 </div>
             </form>
         </div>
@@ -858,7 +860,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    const STORAGE_KEY = 'ENTERPRISE_ARCHIVE_PORTABLE_V6';
+    const STORAGE_KEY = 'ENTERPRISE_ARCHIVE_PORTABLE_V7_CLEAN';
     const THEME_KEY   = 'ENTERPRISE_ARCHIVE_THEME_MODE';
     const IDB_NAME    = 'EnterpriseArchiveFilesDB';
     const IDB_STORE   = 'fileBlobs';
@@ -901,7 +903,7 @@
         currentUserId: 'emp_admin',
         currentFolderId: 'root',
         viewMode: 'explorer',
-        onlyMyFilesFilter: true,
+        onlyMyFilesFilter: false,
         scriptConfig: {
             siteName: 'أرشيف المؤسسة الرقمي',
             orgDepartment: 'بوابة الأرشفة السحابية والمحلية المؤمنة',
@@ -910,23 +912,12 @@
             maintenanceMode: false
         },
         users: [
-            { id: 'emp_admin', username: 'admin', password: '123456', name: 'مدير النظام', role: 'Admin', isAdmin: true, color: '#dc2626' },
-            { id: 'emp_1', username: 'ahmed', password: '1234', name: 'أحمد محمد', role: 'مهندس مشاريع', isAdmin: false, color: '#2563eb' },
-            { id: 'emp_2', username: 'sara', password: '1234', name: 'سارة علي', role: 'الموارد البشرية', isAdmin: false, color: '#059669' },
-            { id: 'emp_3', username: 'khaled', password: '1234', name: 'خالد عبدالله', role: 'المالية', isAdmin: false, color: '#d97706' }
+            { id: 'emp_admin', username: 'admin', password: '123456', name: 'مدير النظام', role: 'المدير العام', isAdmin: true, color: '#dc2626' }
         ],
-        folders: [
-            { id: 'fld_eng', name: 'المخططات الهندسية', parentId: 'root', ownerId: 'emp_1', isLocked: true, pinCode: '', allowedUserIds: ['emp_1'], createdAt: '2026-10-28 09:15' },
-            { id: 'fld_hr', name: 'عقود الموظفين', parentId: 'root', ownerId: 'emp_2', isLocked: true, pinCode: '1234', allowedUserIds: ['emp_2'], createdAt: '2026-10-29 11:30' },
-            { id: 'fld_fin', name: 'التقارير المالية', parentId: 'root', ownerId: 'emp_3', isLocked: true, pinCode: '', allowedUserIds: ['emp_3'], createdAt: '2026-10-30 14:05' }
-        ],
-        files: [
-            { id: 'file_101', name: 'المواصفات_الفنية_للمشروع.pdf', type: 'PDF', sizeMB: 4.2, folderId: 'fld_eng', ownerId: 'emp_1', privacyMode: 'STRICT_OWNER', pinCode: '', cloudProvider: 'BOTH', updatedAt: '2026-11-01 13:10', version: 2 },
-            { id: 'file_102', name: 'مسير_الرواتب_2026.xlsx', type: 'XLSX', sizeMB: 1.8, folderId: 'fld_hr', ownerId: 'emp_2', privacyMode: 'STRICT_OWNER', pinCode: '1234', cloudProvider: 'GDRIVE', updatedAt: '2026-10-29 12:00', version: 1 },
-            { id: 'file_103', name: 'الميزانية_الربعية.xlsx', type: 'XLSX', sizeMB: 2.9, folderId: 'fld_fin', ownerId: 'emp_3', privacyMode: 'STRICT_OWNER', pinCode: '', cloudProvider: 'ONEDRIVE', updatedAt: '2026-11-02 09:12', version: 1 }
-        ],
+        folders: [],
+        files: [],
         auditLogs: [
-            { id: 'l1', timestamp: '2026-11-01 13:10', userId: 'emp_1', action: 'CREATE_FILE', targetName: 'المواصفات_الفنية_للمشروع.pdf', details: 'رفع وأرشفة سحابية' }
+            { id: 'l1', timestamp: '2026-11-01 09:00', userId: 'emp_admin', action: 'SYSTEM_INIT', targetName: 'النظام', details: 'تهيئة النظام الأساسي' }
         ]
     };
 
@@ -954,6 +945,11 @@
     function isCurrentUserAdmin() { return Boolean(getCurrentUser().isAdmin); }
     function getFolderById(id) {
         return appState.folders.find(f => f.id === id) || { id: 'root', name: 'الرئيسية', isLocked: false };
+    }
+
+    // Find the primary folder assigned to an employee
+    function getEmployeeAssignedFolder(userId) {
+        return appState.folders.find(f => f.assignedToUserId === userId || (Array.isArray(f.allowedUserIds) && f.allowedUserIds.includes(userId)));
     }
 
     function showToast(msg) {
@@ -987,11 +983,10 @@
     /* Auth & Permissions */
     function canUserModifyItem(ownerId) { return isCurrentUserAdmin() || appState.currentUserId === ownerId; }
     function canUserAccessFolder(fld) {
-        if (!fld || fld.id === 'root' || isCurrentUserAdmin() || fld.ownerId === appState.currentUserId) return true;
-        if (fld.isLocked || (appState.scriptConfig && appState.scriptConfig.strictZeroTrust)) {
-            return Array.isArray(fld.allowedUserIds) && fld.allowedUserIds.includes(appState.currentUserId);
-        }
-        return true;
+        if (!fld || fld.id === 'root' || isCurrentUserAdmin()) return true;
+        if (fld.assignedToUserId === appState.currentUserId || fld.ownerId === appState.currentUserId) return true;
+        if (Array.isArray(fld.allowedUserIds) && fld.allowedUserIds.includes(appState.currentUserId)) return true;
+        return false;
     }
     function canUserViewFile(file) {
         if (!file) return false;
@@ -1001,13 +996,9 @@
 
     function showFullLoginScreen() {
         unlockedSessionItems.clear();
+        document.getElementById('fullLoginUsername').value = '';
+        document.getElementById('fullLoginPassword').value = '';
         document.getElementById('fullLoginOverlay').classList.remove('d-none');
-    }
-
-    function quickFillLogin(u, p) {
-        document.getElementById('fullLoginUsername').value = u;
-        document.getElementById('fullLoginPassword').value = p;
-        handleFullLoginSubmit(new Event('submit'));
     }
 
     function handleFullLoginSubmit(e) {
@@ -1015,22 +1006,22 @@
         const u = document.getElementById('fullLoginUsername').value.trim().toLowerCase();
         const p = document.getElementById('fullLoginPassword').value.trim();
         const user = appState.users.find(x => (x.username || '').toLowerCase() === u && x.password === p);
-        if (!user) { showToast('بيانات الدخول غير صحيحة'); return; }
+        if (!user) { showToast('اسم المستخدم أو كلمة المرور غير صحيحة'); return; }
         document.getElementById('fullLoginOverlay').classList.add('d-none');
         appState.currentUserId = user.id;
-        appState.currentFolderId = 'root';
-        switchView('explorer', user.isAdmin ? 'all' : 'mine');
+
+        // If employee has an assigned folder created by Admin, open it directly for them
+        if (!user.isAdmin) {
+            const empFolder = getEmployeeAssignedFolder(user.id);
+            appState.currentFolderId = empFolder ? empFolder.id : 'root';
+            switchView('explorer', 'all');
+        } else {
+            appState.currentFolderId = 'root';
+            switchView('explorer', 'all');
+        }
+
         renderAll();
         showToast(`مرحباً ${user.name}`);
-    }
-
-    function changeCurrentUser(uid) {
-        unlockedSessionItems.clear();
-        appState.currentUserId = uid;
-        appState.currentFolderId = 'root';
-        const u = getCurrentUser();
-        switchView('explorer', u.isAdmin ? 'all' : 'mine');
-        renderAll();
     }
 
     function toggleSidebar() {
@@ -1039,6 +1030,11 @@
     }
 
     function switchView(view, sub = 'all') {
+        // Block non-admin users from accessing admin-only views (cloud, users, settings, server)
+        if (!isCurrentUserAdmin() && ['cloud', 'users', 'settings', 'server'].includes(view)) {
+            view = 'explorer';
+        }
+
         appState.viewMode = view;
         appState.onlyMyFilesFilter = (sub === 'mine');
 
@@ -1054,6 +1050,8 @@
             document.getElementById('mobNavCloud').classList.add('active');
         } else if (view === 'users') {
             document.getElementById('navUsersItem').classList.add('active');
+            const mobUsers = document.getElementById('mobNavUsers');
+            if (mobUsers) mobUsers.classList.add('active');
         } else if (view === 'audit') {
             document.getElementById('navAuditLog').classList.add('active');
             document.getElementById('mobNavAudit').classList.add('active');
@@ -1105,7 +1103,7 @@
             }
         }
         appState.currentFolderId = fid;
-        if (fid !== 'root') appState.onlyMyFilesFilter = false;
+        appState.onlyMyFilesFilter = false;
         renderExplorer();
     }
 
@@ -1122,6 +1120,7 @@
 
     /* Render Explorer */
     function renderExplorer() {
+        const isAdmin = isCurrentUserAdmin();
         const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
         const tf = document.getElementById('filterTypeSelect').value;
 
@@ -1132,23 +1131,22 @@
         } else {
             const curr = getFolderById(appState.currentFolderId);
             bc.innerHTML = `
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none" onclick="navigateToFolder('root');return false;">الرئيسية</a></li>
-                ${curr.id !== 'root' ? `<li class="breadcrumb-item active fw-bold">${curr.name}</li>` : ''}
+                <li class="breadcrumb-item"><a href="#" class="text-decoration-none" onclick="navigateToFolder('root');return false;">المجلدات المخصصة</a></li>
+                ${curr.id !== 'root' ? `<li class="breadcrumb-item active fw-bold text-primary"><i class="bi bi-folder2-open me-1"></i>${curr.name}</li>` : ''}
             `;
         }
 
-        // Folders
+        // Folders (Only show folders accessible to current user)
         const folders = appState.folders.filter(f => {
             if (!canUserAccessFolder(f)) return false;
-            if (appState.onlyMyFilesFilter && f.ownerId !== appState.currentUserId && !isCurrentUserAdmin()) return false;
-            if (!appState.onlyMyFilesFilter && !q && f.parentId !== appState.currentFolderId) return false;
+            if (appState.onlyMyFilesFilter) return false;
+            if (!q && f.parentId !== appState.currentFolderId) return false;
             if (q && !f.name.toLowerCase().includes(q)) return false;
             return true;
         });
 
         const fg = document.getElementById('foldersGridContainer');
         fg.innerHTML = folders.map(f => {
-            const canMod = canUserModifyItem(f.ownerId);
             return `
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="clean-card folder-item" onclick="navigateToFolder('${f.id}')">
@@ -1156,13 +1154,14 @@
                             <i class="bi bi-folder-fill ${f.pinCode ? 'text-danger' : 'text-warning'} fs-4 flex-shrink-0"></i>
                             <div class="overflow-hidden">
                                 <div class="fw-bold small text-truncate">${f.name}</div>
-                                <small class="text-secondary" style="font-size:0.7rem;">${f.isLocked ? 'خاص' : 'مشترك'}</small>
+                                <small class="text-secondary" style="font-size:0.7rem;">مجلد عمل مخصص</small>
                             </div>
                         </div>
-                        ${canMod ? `
-                            <button class="btn btn-sm btn-light p-1" onclick="event.stopPropagation();openFolderModal('${f.id}')">
-                                <i class="bi bi-three-dots-vertical"></i>
-                            </button>
+                        ${isAdmin ? `
+                            <div class="d-flex gap-1" onclick="event.stopPropagation();">
+                                <button class="btn btn-sm btn-light p-1" onclick="openFolderModal('${f.id}')" title="تعديل وتخصيص"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-light p-1 text-danger" onclick="deleteFolderNow('${f.id}')" title="حذف"><i class="bi bi-trash"></i></button>
+                            </div>
                         ` : ''}
                     </div>
                 </div>
@@ -1172,7 +1171,7 @@
         // Files
         const files = appState.files.filter(f => {
             if (!canUserViewFile(f)) return false;
-            if (appState.onlyMyFilesFilter && f.ownerId !== appState.currentUserId && !isCurrentUserAdmin()) return false;
+            if (appState.onlyMyFilesFilter && f.ownerId !== appState.currentUserId && !isAdmin) return false;
             if (!appState.onlyMyFilesFilter && !q && tf === 'ALL' && f.folderId !== appState.currentFolderId) return false;
             if (tf !== 'ALL' && f.type !== tf) return false;
             if (q && !f.name.toLowerCase().includes(q)) return false;
@@ -1183,12 +1182,13 @@
         const fc = document.getElementById('filesListContainer');
 
         if (files.length === 0) {
-            fc.innerHTML = `<div class="p-4 text-center text-secondary small">لا توجد ملفات هنا</div>`;
+            fc.innerHTML = `<div class="p-4 text-center text-secondary small">لا توجد ملفات مرفوعة في هذا المجلد حتى الآن</div>`;
         } else {
             fc.innerHTML = files.map(f => {
                 const ic = getFileIconMeta(f.type);
                 const owner = getUserById(f.ownerId);
                 const canMod = canUserModifyItem(f.ownerId);
+                const folderObj = getFolderById(f.folderId);
                 return `
                     <div class="file-item">
                         <div class="d-flex align-items-center gap-2 overflow-hidden" style="cursor:pointer;" onclick="openFileDetails('${f.id}')">
@@ -1199,8 +1199,7 @@
                                     ${f.pinCode ? '<i class="bi bi-lock-fill text-danger ms-1"></i>' : ''}
                                 </div>
                                 <div class="text-secondary d-flex align-items-center gap-2" style="font-size:0.72rem;">
-                                    <span>${owner.name}</span> • <span>${Number(f.sizeMB).toFixed(1)} MB</span>
-                                    ${f.cloudProvider && f.cloudProvider !== 'LOCAL' ? '<span class="text-success"><i class="bi bi-cloud-check-fill"></i></span>' : ''}
+                                    <span>${owner.name}</span> • <span>${folderObj.name}</span> • <span>${Number(f.sizeMB).toFixed(1)} MB</span>
                                 </div>
                             </div>
                         </div>
@@ -1217,17 +1216,33 @@
         }
 
         const myCount = appState.files.filter(f => f.ownerId === appState.currentUserId).length;
-        document.getElementById('statTotalFolders').textContent = folders.length;
+        const accessibleFoldersCount = appState.folders.filter(f => canUserAccessFolder(f)).length;
+        document.getElementById('statTotalFolders').textContent = accessibleFoldersCount;
         document.getElementById('statMyFiles').textContent = myCount;
         document.getElementById('myFilesCountBadge').textContent = myCount;
     }
 
-    /* Folder CRUD */
+    /* Folder CRUD (Admin controls folder creation & assignment) */
     function populateFolderDropdowns(sel) {
+        const isAdmin = isCurrentUserAdmin();
         const list = appState.folders.filter(f => canUserAccessFolder(f));
-        const html = `<option value="root">الرئيسية</option>` + list.map(f => `<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${f.name}</option>`).join('');
-        document.getElementById('folderParentSelect').innerHTML = html;
-        document.getElementById('fileFolderSelect').innerHTML = html;
+        
+        // For Admin folder parent dropdown
+        const parentHtml = `<option value="root">الرئيسية</option>` + list.map(f => `<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${f.name}</option>`).join('');
+        document.getElementById('folderParentSelect').innerHTML = parentHtml;
+
+        // For File upload folder dropdown: Employee only sees their assigned folder(s)
+        let fileFolderHtml = '';
+        if (isAdmin) {
+            fileFolderHtml = `<option value="root">الرئيسية</option>` + list.map(f => `<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${f.name}</option>`).join('');
+        } else {
+            if (list.length > 0) {
+                fileFolderHtml = list.map(f => `<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${f.name}</option>`).join('');
+            } else {
+                fileFolderHtml = `<option value="root">مساحتي الخاصة</option>`;
+            }
+        }
+        document.getElementById('fileFolderSelect').innerHTML = fileFolderHtml;
     }
 
     function toggleFolderAllowedUsersBox() {
@@ -1235,22 +1250,26 @@
     }
 
     function openFolderModal(editId = null) {
+        if (!isCurrentUserAdmin()) {
+            showToast('إنشاء وتخصيص المجلدات من صلاحيات مدير النظام فقط');
+            return;
+        }
         populateFolderDropdowns(appState.currentFolderId);
         const box = document.getElementById('allowedUsersChecklist');
         const folder = editId ? appState.folders.find(f => f.id === editId) : null;
-        const selectedIds = folder ? (folder.allowedUserIds || []) : [appState.currentUserId];
+        const selectedIds = folder ? (folder.allowedUserIds || []) : [];
 
-        box.innerHTML = appState.users.map(u => {
-            const chk = selectedIds.includes(u.id) || u.id === appState.currentUserId || u.isAdmin;
+        box.innerHTML = appState.users.filter(u => !u.isAdmin).map(u => {
+            const chk = selectedIds.includes(u.id);
             return `
                 <div class="col-6">
                     <div class="form-check small">
                         <input class="form-check-input folder-allowed-user-chk" type="checkbox" value="${u.id}" id="u_${u.id}" ${chk ? 'checked' : ''}>
-                        <label class="form-check-label" for="u_${u.id}">${u.name}</label>
+                        <label class="form-check-label" for="u_${u.id}">${u.name} (${u.role})</label>
                     </div>
                 </div>
             `;
-        }).join('');
+        }).join('') || '<div class="col-12 small text-muted">قم بإضافة موظفين أولاً لتخصيص المجلد لهم</div>';
 
         if (folder) {
             document.getElementById('folderIdInput').value = folder.id;
@@ -1269,12 +1288,14 @@
 
     function saveFolder(e) {
         e.preventDefault();
+        if (!isCurrentUserAdmin()) return;
         const id = document.getElementById('folderIdInput').value;
         const name = document.getElementById('folderNameInput').value.trim();
         const parentId = document.getElementById('folderParentSelect').value;
         const pinCode = document.getElementById('folderPinInput').value.trim();
         const isLocked = document.getElementById('folderLockedCheck').checked;
         const allowed = Array.from(document.querySelectorAll('.folder-allowed-user-chk:checked')).map(x => x.value);
+        if (!allowed.includes('emp_admin')) allowed.push('emp_admin');
 
         if (id) {
             const f = appState.folders.find(x => x.id === id);
@@ -1285,7 +1306,16 @@
         saveState();
         bootstrap.Modal.getInstance(document.getElementById('folderModal')).hide();
         renderExplorer();
-        showToast('تم حفظ المجلد');
+        showToast('تم حفظ وتخصيص المجلد');
+    }
+
+    function deleteFolderNow(fldId) {
+        if (!isCurrentUserAdmin()) return;
+        appState.folders = appState.folders.filter(x => x.id !== fldId);
+        appState.files = appState.files.filter(x => x.folderId !== fldId);
+        saveState();
+        renderExplorer();
+        showToast('تم حذف المجلد');
     }
 
     /* File CRUD */
@@ -1312,7 +1342,19 @@
 
     function openFileModal(editId = null) {
         pendingPickedFileDataUrl = null;
-        populateFolderDropdowns(appState.currentFolderId);
+        const isAdmin = isCurrentUserAdmin();
+
+        // Hide Cloud Sync option inside File Modal for regular employees
+        document.getElementById('fileCloudSyncWrapper').classList.toggle('d-none', !isAdmin);
+        document.getElementById('filePinCodeWrapper').className = isAdmin ? 'col-6' : 'col-12';
+
+        let defaultFolder = appState.currentFolderId;
+        if (!isAdmin && defaultFolder === 'root') {
+            const empFolder = getEmployeeAssignedFolder(appState.currentUserId);
+            if (empFolder) defaultFolder = empFolder.id;
+        }
+        populateFolderDropdowns(defaultFolder);
+
         if (editId) {
             const f = appState.files.find(x => x.id === editId);
             if (!f) return;
@@ -1320,12 +1362,12 @@
             document.getElementById('fileNameInput').value = f.name;
             document.getElementById('fileTypeInput').value = f.type;
             document.getElementById('fileFolderSelect').value = f.folderId;
-            document.getElementById('fileCloudSyncSelect').value = f.cloudProvider || 'BOTH';
+            document.getElementById('fileCloudSyncSelect').value = f.cloudProvider || 'LOCAL';
             document.getElementById('filePinCodeInput').value = f.pinCode || '';
         } else {
             document.getElementById('fileForm').reset();
             document.getElementById('fileIdInput').value = '';
-            document.getElementById('fileFolderSelect').value = appState.currentFolderId;
+            document.getElementById('fileFolderSelect').value = defaultFolder;
         }
         new bootstrap.Modal(document.getElementById('fileModal')).show();
     }
@@ -1336,7 +1378,7 @@
         const name = document.getElementById('fileNameInput').value.trim();
         const type = document.getElementById('fileTypeInput').value;
         const folderId = document.getElementById('fileFolderSelect').value;
-        const cloudProvider = document.getElementById('fileCloudSyncSelect').value;
+        const cloudProvider = isCurrentUserAdmin() ? document.getElementById('fileCloudSyncSelect').value : 'LOCAL';
         const pinCode = document.getElementById('filePinCodeInput').value.trim();
         const sizeMB = parseFloat(document.getElementById('fileSizeInput').value) || 0.5;
 
@@ -1360,7 +1402,7 @@
         saveState();
         bootstrap.Modal.getInstance(document.getElementById('fileModal')).hide();
         renderExplorer();
-        showToast('تم حفظ الملف');
+        showToast('تم حفظ الملف بنجاح');
     }
 
     function deleteFileNow(fid) {
@@ -1381,6 +1423,7 @@
         }
         const dataUrl = await getFileContentFromIDB(f.id);
         const owner = getUserById(f.ownerId);
+        const folderObj = getFolderById(f.folderId);
         let prev = `<div class="p-3 bg-light rounded text-center small text-secondary mb-3">معاينة آمنة للملف</div>`;
         if (dataUrl && (f.type === 'IMAGE' || dataUrl.startsWith('data:image/'))) {
             prev = `<div class="watermark-box text-center mb-3" data-watermark="${getCurrentUser().name}"><img src="${dataUrl}" class="img-fluid rounded" style="max-height:240px;"></div>`;
@@ -1389,9 +1432,9 @@
             ${prev}
             <div class="small">
                 <div class="d-flex justify-content-between py-1 border-bottom"><span>الاسم:</span><strong>${f.name}</strong></div>
+                <div class="d-flex justify-content-between py-1 border-bottom"><span>المجلد:</span><strong>${folderObj.name}</strong></div>
                 <div class="d-flex justify-content-between py-1 border-bottom"><span>المالك:</span><strong>${owner.name}</strong></div>
-                <div class="d-flex justify-content-between py-1 border-bottom"><span>التحديث:</span><strong>${f.updatedAt}</strong></div>
-                <div class="d-flex justify-content-between py-1"><span>السحابة:</span><strong>${f.cloudProvider}</strong></div>
+                <div class="d-flex justify-content-between py-1"><span>التحديث:</span><strong>${f.updatedAt}</strong></div>
             </div>
         `;
         document.getElementById('modalDownloadRealBtn').onclick = () => downloadRealOrSimulatedFile(f.id);
@@ -1417,10 +1460,16 @@
         showToast('جاري التحميل...');
     }
 
-    /* Cloud Center */
+    /* Cloud Center (Admin Only) */
     function renderCloudDriveCenter() {
-        const list = appState.files.filter(f => canUserViewFile(f));
-        document.getElementById('cloudFilesListContainer').innerHTML = list.map(f => `
+        if (!isCurrentUserAdmin()) return;
+        const list = appState.files;
+        const box = document.getElementById('cloudFilesListContainer');
+        if (list.length === 0) {
+            box.innerHTML = `<div class="p-4 text-center text-secondary small">لا توجد ملفات للمزامنة</div>`;
+            return;
+        }
+        box.innerHTML = list.map(f => `
             <div class="file-item">
                 <div class="overflow-hidden">
                     <div class="fw-bold small text-truncate">${f.name}</div>
@@ -1438,64 +1487,149 @@
         if (f) { f.cloudProvider = prov; addAuditLog('CLOUD_SYNC', f.name, `مزامنة إلى ${prov}`); saveState(); renderCloudDriveCenter(); showToast('تمت المزامنة السحابية'); }
     }
     function bulkSyncCurrentUserFiles(prov) {
-        appState.files.filter(f => canUserViewFile(f)).forEach(f => f.cloudProvider = prov);
-        saveState(); renderCloudDriveCenter(); showToast('تمت مزامنة جميع ملفاتك سحابياً');
+        appState.files.forEach(f => f.cloudProvider = prov);
+        saveState(); renderCloudDriveCenter(); showToast('تمت مزامنة جميع الملفات سحابياً');
     }
     function saveCloudProviderConfig() { showToast('تم حفظ إعدادات الربط السحابي'); }
 
-    /* Users */
+    /* Users Management & Auto Folder Creation (Admin Control Panel) */
     function renderUsersManagement() {
         const isAdmin = isCurrentUserAdmin();
         const c = document.getElementById('usersCardsContainer');
-        c.innerHTML = appState.users.map(u => `
+        c.innerHTML = appState.users.map(u => {
+            const userFilesCount = appState.files.filter(f => f.ownerId === u.id).length;
+            const assignedFolder = getEmployeeAssignedFolder(u.id);
+            return `
             <div class="col-12 col-md-6 col-lg-4">
                 <div class="clean-card p-3 d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-2">
-                        <div class="avatar-sm" style="background:${u.color}">${u.name.charAt(0)}</div>
-                        <div>
-                            <div class="fw-bold small">${u.name}</div>
-                            <small class="text-secondary">${u.role} (${u.username})</small>
+                    <div class="d-flex align-items-center gap-2 overflow-hidden">
+                        <div class="avatar-sm" style="background:${u.color || '#2563eb'}">${u.name.charAt(0)}</div>
+                        <div class="overflow-hidden">
+                            <div class="fw-bold small text-truncate">
+                                ${u.name}
+                                ${u.isAdmin ? '<span class="badge bg-danger bg-opacity-10 text-danger ms-1" style="font-size:0.65rem;">مدير</span>' : ''}
+                            </div>
+                            <small class="text-secondary d-block text-truncate">${u.role} • دخول: <code>${u.username}</code></small>
+                            <small class="text-primary d-block text-truncate" style="font-size:0.72rem;">
+                                <i class="bi bi-folder-fill text-warning me-1"></i>${u.isAdmin ? 'وصول شامل لكل المجلدات' : (assignedFolder ? assignedFolder.name : 'بدون مجلد')} (${userFilesCount} ملف)
+                            </small>
                         </div>
                     </div>
-                    ${isAdmin ? `<button class="btn btn-sm btn-light border" onclick="openUserModal('${u.id}')"><i class="bi bi-pencil"></i></button>` : ''}
+                    ${isAdmin ? `
+                        <div class="d-flex gap-1 flex-shrink-0">
+                            ${assignedFolder ? `<button class="btn btn-sm btn-light border text-primary" onclick="switchView('explorer','all');navigateToFolder('${assignedFolder.id}')" title="فتح فولدر الموظف"><i class="bi bi-folder2-open"></i></button>` : ''}
+                            <button class="btn btn-sm btn-light border" onclick="openUserModal('${u.id}')" title="تعديل"><i class="bi bi-pencil"></i></button>
+                            ${u.id !== 'emp_admin' && u.id !== appState.currentUserId ? `
+                                <button class="btn btn-sm btn-light border text-danger" onclick="deleteUserAccount('${u.id}')" title="حذف الحساب"><i class="bi bi-trash"></i></button>
+                            ` : ''}
+                        </div>
+                    ` : ''}
                 </div>
             </div>
-        `).join('');
+        `}).join('');
     }
+
     function openUserModal(uid = null) {
         if (!isCurrentUserAdmin()) return;
         if (uid) {
             const u = getUserById(uid);
+            const assignedFolder = getEmployeeAssignedFolder(u.id);
+            document.getElementById('userModalTitle').textContent = 'تعديل حساب الموظف';
             document.getElementById('editUserIdInput').value = u.id;
             document.getElementById('userNameInput').value = u.name;
             document.getElementById('userUsernameInput').value = u.username;
             document.getElementById('userPasswordInput').value = u.password;
             document.getElementById('userJobInput').value = u.role;
+            document.getElementById('userCustomFolderNameInput').value = assignedFolder ? assignedFolder.name : `فولدر - ${u.name}`;
             document.getElementById('userRoleTypeInput').value = u.isAdmin ? 'admin' : 'employee';
         } else {
+            document.getElementById('userModalTitle').textContent = 'إنشاء حساب وفولدر موظف';
             document.getElementById('userForm').reset();
             document.getElementById('editUserIdInput').value = '';
+            document.getElementById('userCustomFolderNameInput').value = '';
         }
         new bootstrap.Modal(document.getElementById('userModal')).show();
     }
+
     function saveUserAccount(e) {
         e.preventDefault();
+        if (!isCurrentUserAdmin()) return;
         const id = document.getElementById('editUserIdInput').value;
         const name = document.getElementById('userNameInput').value.trim();
         const username = document.getElementById('userUsernameInput').value.trim();
         const password = document.getElementById('userPasswordInput').value.trim();
         const role = document.getElementById('userJobInput').value.trim();
+        const customFolderName = document.getElementById('userCustomFolderNameInput').value.trim() || `ملفات - ${name}`;
         const isAdmin = document.getElementById('userRoleTypeInput').value === 'admin';
+
+        // Check duplicate username
+        const exists = appState.users.find(x => x.username.toLowerCase() === username.toLowerCase() && x.id !== id);
+        if (exists) {
+            showToast('اسم المستخدم مسجل مسبقاً لموظف آخر');
+            return;
+        }
+
+        const colors = ['#2563eb', '#059669', '#d97706', '#7c3aed', '#0891b2', '#db2777'];
         if (id) {
             const u = appState.users.find(x => x.id === id);
-            if (u) { u.name = name; u.username = username; u.password = password; u.role = role; u.isAdmin = isAdmin; }
+            if (u) {
+                u.name = name; u.username = username; u.password = password; u.role = role; u.isAdmin = isAdmin;
+                // Update or create their dedicated folder
+                if (!isAdmin) {
+                    let empFolder = getEmployeeAssignedFolder(u.id);
+                    if (empFolder) {
+                        empFolder.name = customFolderName;
+                    } else {
+                        appState.folders.push({
+                            id: 'fld_' + Date.now(),
+                            name: customFolderName,
+                            parentId: 'root',
+                            ownerId: 'emp_admin',
+                            assignedToUserId: u.id,
+                            isLocked: true,
+                            pinCode: '',
+                            allowedUserIds: [u.id, 'emp_admin'],
+                            createdAt: getFormattedNow()
+                        });
+                    }
+                }
+            }
         } else {
-            appState.users.push({ id: 'emp_' + Date.now(), name, username, password, role, isAdmin, color: '#2563eb' });
+            const newUserId = 'emp_' + Date.now();
+            const randomColor = colors[appState.users.length % colors.length];
+            appState.users.push({ id: newUserId, name, username, password, role, isAdmin, color: randomColor });
+
+            // Automatically create a dedicated workspace folder for this employee
+            if (!isAdmin) {
+                appState.folders.push({
+                    id: 'fld_' + (Date.now() + 1),
+                    name: customFolderName,
+                    parentId: 'root',
+                    ownerId: 'emp_admin',
+                    assignedToUserId: newUserId,
+                    isLocked: true,
+                    pinCode: '',
+                    allowedUserIds: [newUserId, 'emp_admin'],
+                    createdAt: getFormattedNow()
+                });
+            }
         }
         saveState();
         bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
         renderAll();
-        showToast('تم حفظ بيانات الموظف');
+        showToast('تم حفظ حساب الموظف وتخصيص الفولدر الخاص به');
+    }
+
+    function deleteUserAccount(uid) {
+        if (!isCurrentUserAdmin()) return;
+        if (uid === 'emp_admin' || uid === appState.currentUserId) {
+            showToast('لا يمكن حذف الحساب الرئيسي الحالي');
+            return;
+        }
+        appState.users = appState.users.filter(u => u.id !== uid);
+        saveState();
+        renderAll();
+        showToast('تم حذف حساب الموظف');
     }
 
     /* Audit */
@@ -1554,15 +1688,23 @@
         document.getElementById('cfgOrgDepartment').value = cfg.orgDepartment || '';
 
         document.getElementById('sidebarUserAvatar').textContent = u.name.charAt(0);
-        document.getElementById('sidebarUserAvatar').style.backgroundColor = u.color;
+        document.getElementById('sidebarUserAvatar').style.backgroundColor = u.color || '#2563eb';
         document.getElementById('sidebarUserName').textContent = u.name;
         document.getElementById('sidebarUserRole').textContent = u.role;
-        document.getElementById('roleBannerBadge').textContent = isAdmin ? 'لوحة الإدارة الشاملة' : `خزنة: ${u.name}`;
+        document.getElementById('roleBannerBadge').textContent = isAdmin ? 'لوحة الإدارة الشاملة' : `مساحة عمل: ${u.name}`;
 
+        // Show/Hide Admin-Only Navigation Items (Cloud Drive, Server Setup, Users, Settings, Create Folder Button)
+        document.getElementById('navCloudDrive').classList.toggle('d-none', !isAdmin);
+        document.getElementById('navServerSetup').classList.toggle('d-none', !isAdmin);
         document.getElementById('navUsersItem').classList.toggle('d-none', !isAdmin);
         document.getElementById('navSettingsItem').classList.toggle('d-none', !isAdmin);
+        document.getElementById('headerManageUsersBtn').classList.toggle('d-none', !isAdmin);
+        document.getElementById('btnCreateFolderMain').classList.toggle('d-none', !isAdmin);
 
-        document.getElementById('userSwitcherSelect').innerHTML = appState.users.map(x => `<option value="${x.id}" ${x.id === u.id ? 'selected' : ''}>${x.name}</option>`).join('');
+        const mobCloud = document.getElementById('mobNavCloud');
+        if (mobCloud) mobCloud.classList.toggle('d-none', !isAdmin);
+        const mobUsers = document.getElementById('mobNavUsers');
+        if (mobUsers) mobUsers.classList.toggle('d-none', !isAdmin);
 
         const totalMB = appState.files.filter(f => canUserViewFile(f)).reduce((s, f) => s + Number(f.sizeMB || 0), 0);
         document.getElementById('storageUsedText').textContent = `${totalMB.toFixed(1)} MB`;
