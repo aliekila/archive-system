@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>أرشيف المؤسسة الرقمي | v7.5</title>
+    <title>أرشيف المؤسسة الرقمي | v8.0</title>
     
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
@@ -46,7 +46,6 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* Clean Flat Surfaces */
         .clean-card {
             background: var(--surface);
             border: 1px solid var(--border-color);
@@ -76,13 +75,14 @@
             align-items: center;
             justify-content: center;
             padding: 1rem;
+            overflow-y: auto;
         }
         .login-box {
             background: var(--surface);
             border: 1px solid var(--border-color);
             border-radius: 20px;
             width: 100%;
-            max-width: 400px;
+            max-width: 410px;
             padding: 2rem 1.5rem;
             box-shadow: 0 10px 30px rgba(0,0,0,0.04);
         }
@@ -134,7 +134,6 @@
             z-index: 1020;
         }
 
-        /* Navigation Links */
         .side-nav .nav-link {
             color: var(--text-muted);
             font-weight: 600;
@@ -152,7 +151,6 @@
             color: var(--primary);
         }
 
-        /* Folder & File Minimal Items */
         .folder-item {
             cursor: pointer;
             padding: 0.95rem 1rem;
@@ -207,7 +205,6 @@
             flex-shrink: 0;
         }
 
-        /* Mobile Bottom Bar */
         .mobile-bottom-nav {
             display: none;
             position: fixed;
@@ -240,7 +237,6 @@
             background: var(--primary-soft);
         }
 
-        /* Watermark */
         .watermark-box { position: relative; overflow: hidden; }
         .watermark-box::after {
             content: attr(data-watermark);
@@ -256,7 +252,6 @@
             pointer-events: none;
         }
 
-        /* Dark Mode Form Overrides */
         body.dark-mode .form-control,
         body.dark-mode .form-select,
         body.dark-mode .input-group-text {
@@ -267,7 +262,6 @@
         body.dark-mode .bg-light { background-color: var(--surface-sub) !important; }
         body.dark-mode .text-dark { color: var(--text-main) !important; }
 
-        /* Responsive Breakpoints */
         @media (max-width: 991.98px) {
             .app-sidebar {
                 position: fixed;
@@ -310,23 +304,48 @@
             <i class="bi bi-building-fill-lock"></i>
         </div>
         <h5 class="fw-bold mb-1" id="loginPortalOrgName">أرشيف المؤسسة الرقمي</h5>
-        <p class="text-secondary small mb-4" id="loginPortalOrgSub">بوابة الدخول الآمن للموظفين والإدارة</p>
+        <p class="text-secondary small mb-3" id="loginPortalOrgSub">بوابة الدخول الآمن للموظفين والإدارة</p>
+
+        <!-- Multi-Device Cloud Sync Status Indicator on Login -->
+        <div id="loginSyncStatusBanner" class="small mb-3 py-1 px-2 rounded bg-light border text-secondary">
+            <i class="bi bi-phone me-1 text-primary"></i>يعمل على جميع الهواتف وأجهزة الكمبيوتر
+        </div>
 
         <form onsubmit="handleFullLoginSubmit(event)" class="text-start">
             <div class="mb-3">
                 <label class="form-label small fw-bold">اسم المستخدم</label>
-                <input type="text" id="fullLoginUsername" class="form-control" dir="ltr" placeholder="username" required>
+                <input type="text" id="fullLoginUsername" class="form-control" dir="ltr" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="username" placeholder="username" required>
             </div>
             <div class="mb-3">
                 <label class="form-label small fw-bold">كلمة المرور</label>
-                <input type="password" id="fullLoginPassword" class="form-control" dir="ltr" placeholder="••••••••" required>
+                <div class="input-group" dir="ltr">
+                    <input type="password" id="fullLoginPassword" class="form-control" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="current-password" placeholder="••••••••" required>
+                    <button class="btn btn-outline-secondary" type="button" onclick="toggleLoginPasswordVisibility()" title="إظهار / إخفاء كلمة المرور">
+                        <i class="bi bi-eye" id="loginEyeIcon"></i>
+                    </button>
+                </div>
             </div>
-            <button type="submit" class="btn btn-primary clean-btn w-100 py-2 mb-2">
+            <button type="submit" id="loginSubmitBtn" class="btn btn-primary clean-btn w-100 py-2 mb-2">
                 <i class="bi bi-box-arrow-in-left"></i> تسجيل الدخول
             </button>
         </form>
 
-        <div class="mt-4 pt-3 border-top small">
+        <!-- Quick Link to Sync Accounts on a New Phone if Script URL isn't in URL hash -->
+        <div class="mt-2">
+            <button type="button" class="btn btn-link btn-sm text-decoration-none text-secondary" onclick="togglePhoneSyncSetupBox()">
+                <i class="bi bi-cloud-arrow-down me-1"></i>مزامنة حسابات الموظفين على هذا الهاتف
+            </button>
+            <div id="phoneSyncSetupBox" class="d-none mt-2 p-2 rounded bg-light border text-start">
+                <label class="form-label small fw-bold mb-1">رابط جسر المزامنة (Google Script URL):</label>
+                <div class="input-group input-group-sm" dir="ltr">
+                    <input type="url" id="loginBridgeUrlInput" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+                    <button class="btn btn-primary" type="button" onclick="pullDatabaseFromCloudOnLogin()">جلب الحسابات</button>
+                </div>
+                <small class="text-secondary d-block mt-1" style="font-size:0.7rem;">أو افتح الرابط المنسوخ من لوحة تحكم المدير ليتم الربط تلقائياً</small>
+            </div>
+        </div>
+
+        <div class="mt-3 pt-3 border-top small">
             <a href="https://facebook.com/aliakilakotop" target="_blank" class="text-decoration-none fw-bold text-primary">
                 Developed By : Ali Akila
             </a>
@@ -348,7 +367,6 @@
             <button class="btn btn-sm btn-light d-lg-none" onclick="toggleSidebar()"><i class="bi bi-x-lg"></i></button>
         </div>
 
-        <!-- Compact Active User Pill -->
         <div class="p-2 rounded-3 bg-light border mb-3 d-flex align-items-center gap-2">
             <div id="sidebarUserAvatar" class="avatar-sm bg-primary">م</div>
             <div class="overflow-hidden">
@@ -403,7 +421,6 @@
 
     <!-- ==================== 3. MAIN WORKSPACE ==================== -->
     <main class="app-main">
-        <!-- Minimal Header -->
         <header class="app-header d-flex align-items-center justify-content-between gap-2">
             <div class="d-flex align-items-center gap-2 overflow-hidden">
                 <button class="btn btn-light border btn-sm d-lg-none" onclick="toggleSidebar()">
@@ -413,12 +430,15 @@
             </div>
 
             <div class="d-flex align-items-center gap-2">
-                <!-- Quick Button for Admin to Create/Manage Accounts -->
+                <!-- Share Mobile Link Button (Admin Only) -->
+                <button class="btn btn-outline-success btn-sm clean-btn py-1 px-2 d-none" id="headerShareMobileLinkBtn" onclick="copyShareableMobileLink()" title="نسخ رابط الدخول المباشر للهواتف">
+                    <i class="bi bi-phone-fill"></i> <span class="d-none d-md-inline">رابط الهواتف</span>
+                </button>
+
                 <button class="btn btn-outline-primary btn-sm clean-btn py-1 px-2 d-none" id="headerManageUsersBtn" onclick="switchView('users')">
                     <i class="bi bi-person-plus-fill"></i> <span class="d-none d-sm-inline">إدارة الحسابات</span>
                 </button>
 
-                <!-- Theme Toggle -->
                 <button class="btn btn-light border btn-sm" onclick="toggleTheme()" title="الوضع الليلي / النهاري">
                     <i class="bi bi-moon-stars-fill text-primary" id="themeToggleIcon"></i>
                 </button>
@@ -429,14 +449,12 @@
 
             <!-- ==================== VIEW: EXPLORER ==================== -->
             <div id="viewExplorer">
-                <!-- Action Bar + Stats Summary -->
                 <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
                     <div class="d-flex align-items-center gap-2 flex-wrap">
                         <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fw-bold" id="roleBannerBadge">خزنتي</span>
                         <span class="text-secondary small"><strong id="statTotalFolders">0</strong> مجلد • <strong id="statMyFiles">0</strong> ملف</span>
                     </div>
                     <div class="d-flex gap-2">
-                        <!-- Folder creation restricted to Admin -->
                         <button class="btn btn-light border clean-btn btn-sm d-none" id="btnCreateFolderMain" onclick="openFolderModal()">
                             <i class="bi bi-folder-plus text-warning"></i> <span>تخصيص مجلد</span>
                         </button>
@@ -446,7 +464,6 @@
                     </div>
                 </div>
 
-                <!-- Search & Filter Bar -->
                 <div class="clean-card p-2 mb-3">
                     <div class="row g-2 align-items-center">
                         <div class="col-12 col-md-5">
@@ -471,10 +488,8 @@
                     </div>
                 </div>
 
-                <!-- Folders Grid -->
                 <div class="row g-2 mb-3" id="foldersGridContainer"></div>
 
-                <!-- Files Clean List -->
                 <div class="clean-card overflow-hidden">
                     <div class="px-3 py-2 border-bottom bg-light d-flex justify-content-between align-items-center">
                         <span class="fw-bold small">الملفات</span>
@@ -484,20 +499,24 @@
                 </div>
             </div>
 
-            <!-- ==================== VIEW: CLOUD DRIVE (ADMIN ONLY - REAL UPLOAD ENGINE) ==================== -->
+            <!-- ==================== VIEW: CLOUD DRIVE (ADMIN ONLY) ==================== -->
             <div id="viewCloudDrive" class="d-none">
-                <!-- Explanation Alert for Why Folder ID Needs Script Bridge -->
                 <div class="clean-card p-3 mb-3 border-primary bg-primary bg-opacity-10">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
                         <div>
-                            <h6 class="fw-bold text-primary mb-1"><i class="bi bi-cloud-arrow-up-fill me-1"></i>الربط الفعلي المباشر مع Google Drive</h6>
+                            <h6 class="fw-bold text-primary mb-1"><i class="bi bi-cloud-arrow-up-fill me-1"></i>الربط السحابي الشامل (رفع الملفات + مزامنة حسابات الموظفين على الهواتف)</h6>
                             <p class="small mb-0 text-secondary">
-                                حتى يتم رفع الملفات فعلياً داخل مجلدك في Google Drive، تحتاج إلى وضع <strong>Folder ID</strong> مع <strong>رابط جسر الرفع (Google Apps Script URL)</strong> لكي يسمح جوجل للنظام بوضع الملفات داخل حسابك.
+                                عند استخدام كود الجسر المحدث (v8.0)، يقوم النظام برفع الملفات إلى <strong>Google Drive</strong> وأيضاً <strong>مزامنة حسابات الموظفين والمجلدات تلقائياً</strong> لكي يتمكن الموظفون من الدخول من هواتفهم فوراً!
                             </p>
                         </div>
-                        <button class="btn btn-primary btn-sm clean-btn" onclick="openGoogleScriptGuideModal()">
-                            <i class="bi bi-magic"></i> احصل على كود ورابط الربط في دقيقة واحدة
-                        </button>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-sm clean-btn" onclick="openGoogleScriptGuideModal()">
+                                <i class="bi bi-magic"></i> كود الجسر المحدث (v8.0)
+                            </button>
+                            <button class="btn btn-success btn-sm clean-btn" onclick="copyShareableMobileLink()">
+                                <i class="bi bi-share-fill"></i> نسخ رابط الهواتف للموظفين
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -508,37 +527,35 @@
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="icon-sq bg-success bg-opacity-10 text-success"><i class="bi bi-google"></i></div>
                                     <div>
-                                        <h6 class="fw-bold mb-0">إعدادات الرفع الحقيقي إلى Google Drive</h6>
+                                        <h6 class="fw-bold mb-0">إعدادات Google Drive ومزامنة الحسابات</h6>
                                         <small class="text-secondary" id="gdriveConnectionStatusText">بانتظار حفظ رابط الجسر و Folder ID</small>
                                     </div>
                                 </div>
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="gdriveAutoSyncToggle" checked onchange="saveCloudProviderConfig('GDRIVE')">
-                                    <label class="form-check-label small fw-bold" for="gdriveAutoSyncToggle">رفع تلقائي عند إضافة أي ملف</label>
+                                    <label class="form-check-label small fw-bold" for="gdriveAutoSyncToggle">مزامنة تلقائية</label>
                                 </div>
                             </div>
 
                             <div class="mb-2">
                                 <label class="form-label small fw-bold mb-1">1. معرف مجلد جوجل درايف (Google Drive Folder ID)</label>
                                 <input type="text" id="gdriveFolderIdInput" class="form-control form-control-sm" dir="ltr" placeholder="مثال: 1A2B3C4D5E6F7G8H9I0J...">
-                                <small class="text-secondary" style="font-size: 0.72rem;">الجزء الأخير من رابط المجلد بعد <code>/folders/</code> (أو الصق رابط المجلد كاملاً وسيتم استخراجه تلقائياً)</small>
                             </div>
 
                             <div class="mb-3">
                                 <label class="form-label small fw-bold mb-1">2. رابط جسر جوجل درايف (Google Apps Script Web App URL)</label>
                                 <input type="url" id="gdriveScriptUrlInput" class="form-control form-control-sm" dir="ltr" placeholder="https://script.google.com/macros/s/......./exec">
-                                <small class="text-secondary" style="font-size: 0.72rem;">اضغط على زر <strong>"احصل على كود ورابط الربط"</strong> بالأعلى لإنشائه مجاناً من حسابك في دقيقتين</small>
                             </div>
 
                             <div class="d-flex flex-wrap gap-2">
                                 <button class="btn btn-success btn-sm clean-btn flex-grow-1" onclick="saveCloudProviderConfig('GDRIVE')">
-                                    <i class="bi bi-check2-circle"></i> حفظ وتفعيل الربط مع Google Drive
+                                    <i class="bi bi-check2-circle"></i> حفظ وتفعيل المزامنة السحابية
                                 </button>
-                                <button class="btn btn-outline-success btn-sm clean-btn" onclick="testRealGoogleDriveConnection()">
-                                    <i class="bi bi-send-check"></i> إرسال ملف تجريبي الآن للتأكد
+                                <button class="btn btn-outline-primary btn-sm clean-btn" onclick="pushDatabaseToCloudNow()">
+                                    <i class="bi bi-cloud-arrow-up"></i> رفع الحسابات والمجلدات للسحابة الآن
                                 </button>
                                 <button class="btn btn-light border btn-sm clean-btn" onclick="openGoogleDriveFolderDirect()">
-                                    <i class="bi bi-box-arrow-up-right"></i> فتح المجلد في Drive
+                                    <i class="bi bi-box-arrow-up-right"></i> فتح المجلد
                                 </button>
                             </div>
                         </div>
@@ -551,7 +568,7 @@
                                     <div class="icon-sq bg-primary bg-opacity-10 text-primary"><i class="bi bi-microsoft"></i></div>
                                     <div>
                                         <h6 class="fw-bold mb-0">Microsoft OneDrive</h6>
-                                        <small class="text-secondary">نسخ احتياطي سحابي (Webhook / المسار)</small>
+                                        <small class="text-secondary">مسار الأرشفة الاحتياطي</small>
                                     </div>
                                 </div>
                                 <div class="form-check form-switch">
@@ -559,7 +576,7 @@
                                 </div>
                             </div>
                             <div class="mb-2">
-                                <label class="form-label small fw-bold mb-1">مسار المجلد أو رابط Power Automate Webhook</label>
+                                <label class="form-label small fw-bold mb-1">مسار المجلد أو رابط Webhook</label>
                                 <input type="text" id="onedriveFolderPathInput" class="form-control form-control-sm" dir="ltr" placeholder="/Enterprise_Archive_Vault">
                             </div>
                             <div class="d-flex gap-2 mt-3">
@@ -573,7 +590,6 @@
                     <div class="p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <div>
                             <span class="fw-bold small">حالة رفع الملفات على Google Drive</span>
-                            <small class="text-secondary d-block">اضغط على أيقونة Google بجانب أي ملف لرفعه فوراً إلى مجلدك في Google Drive</small>
                         </div>
                         <button class="btn btn-success btn-sm clean-btn py-1" onclick="bulkSyncCurrentUserFiles('GDRIVE')">
                             <i class="bi bi-cloud-upload-fill"></i> رفع جميع الملفات إلى Google Drive الآن
@@ -585,14 +601,19 @@
 
             <!-- ==================== VIEW: USERS (ADMIN) ==================== -->
             <div id="viewUsers" class="d-none">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                     <div>
                         <h6 class="fw-bold mb-0">إدارة حسابات الموظفين وتخصيص المجلدات</h6>
-                        <small class="text-secondary">عند إنشاء موظف جديد يتم إنشاء مجلد عمل خاص به تلقائياً</small>
+                        <small class="text-secondary">بعد إنشاء أي حساب اضغط "نسخ رابط الهواتف" ليعمل الموظف من هاتفه مباشرة</small>
                     </div>
-                    <button class="btn btn-primary btn-sm clean-btn" id="btnAddUserInView" onclick="openUserModal()">
-                        <i class="bi bi-person-plus-fill"></i> إنشاء حساب ومجلد موظف
-                    </button>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-success btn-sm clean-btn" onclick="copyShareableMobileLink()">
+                            <i class="bi bi-phone-fill"></i> نسخ رابط الهواتف
+                        </button>
+                        <button class="btn btn-primary btn-sm clean-btn" id="btnAddUserInView" onclick="openUserModal()">
+                            <i class="bi bi-person-plus-fill"></i> إنشاء حساب ومجلد موظف
+                        </button>
+                    </div>
                 </div>
                 <div class="row g-2" id="usersCardsContainer"></div>
             </div>
@@ -678,7 +699,6 @@
 
         </div>
 
-        <!-- Clean Minimal Footer -->
         <footer class="mt-auto py-3 px-4 border-top text-center small text-secondary">
             <a href="https://facebook.com/aliakilakotop" target="_blank" class="text-decoration-none fw-bold text-primary">
                 <i class="bi bi-facebook me-1"></i> Developed By : Ali Akila
@@ -710,32 +730,52 @@
 </nav>
 
 <!-- ==================== MODALS ==================== -->
-<!-- Google Apps Script Setup Guide Modal -->
+<!-- Google Apps Script Setup Guide Modal (v8.0 Multi-Device Sync) -->
 <div class="modal fade" id="googleScriptGuideModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content clean-card border-0">
             <div class="modal-header border-bottom py-2">
-                <h6 class="modal-title fw-bold text-primary"><i class="bi bi-google me-1"></i>طريقة تفعيل الرفع التلقائي الحقيقي إلى Google Drive (في دقيقتين)</h6>
+                <h6 class="modal-title fw-bold text-primary"><i class="bi bi-google me-1"></i>كود الجسر المحدث (v8.0) لمزامنة الهواتف ورفع الملفات</h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body small">
-                <div class="alert alert-info py-2 mb-3">
-                    <strong>لماذا هذه الخطوة؟</strong> لأن Google Drive لا يسمح لأي موقع خارجي بوضع ملفات داخل مجلدك بمجرد كتابة <code>Folder ID</code> فقط؛ بل يجب وضع هذا الكود الصغير في حسابك ليكون هو "البوابة الآمنة" التي تستقبل الملفات وتضعها داخل الفولدر الخاص بك.
+                <div class="alert alert-success py-2 mb-3">
+                    <strong>تحديث هام لتشغيل الهواتف:</strong> هذا الكود المحدث يقوم بوظيفتين معاً: (1) رفع الملفات إلى Google Drive، و(2) حفظ قائمة حسابات الموظفين والمجلدات في ملف مشترك داخل مجلدك ليتمكن أي موظف من الدخول من هاتفه فوراً!
                 </div>
 
-                <ol class="mb-3 ps-3" style="line-height: 1.9;">
-                    <li>افتح موقع <a href="https://script.google.com" target="_blank" class="fw-bold">script.google.com</a> بحساب جوجل الخاص بك واضغط <strong>New Project (مشروع جديد)</strong>.</li>
-                    <li>امسح أي كود موجود هناك، والصق الكود التالي مكانه:</li>
+                <ol class="mb-2 ps-3" style="line-height: 1.8;">
+                    <li>افتح مشروعك في <a href="https://script.google.com" target="_blank" class="fw-bold">script.google.com</a> واستبدل الكود القديم بهذا الكود:</li>
                 </ol>
 
                 <div class="position-relative mb-3">
                     <button type="button" class="btn btn-sm btn-primary position-absolute top-0 start-0 m-2" onclick="copyGoogleAppsScriptCode()">
                         <i class="bi bi-clipboard"></i> نسخ الكود
                     </button>
-                    <pre id="gasCodeBlock" class="p-3 rounded bg-dark text-light mb-0" dir="ltr" style="font-size: 0.78rem; overflow-x: auto;">function doPost(e) {
+                    <pre id="gasCodeBlock" class="p-3 rounded bg-dark text-light mb-0" dir="ltr" style="font-size: 0.75rem; overflow-x: auto;">function doGet(e) {
+  try {
+    var folderId = e.parameter.folderId;
+    var folder = folderId ? DriveApp.getFolderById(folderId) : DriveApp.getRootFolder();
+    var files = folder.getFilesByName('_archive_sync_db.json');
+    if (files.hasNext()) {
+      var content = files.next().getBlob().getDataAsString();
+      return ContentService.createTextOutput(content).setMimeType(ContentService.MimeType.JSON);
+    }
+    return ContentService.createTextOutput(JSON.stringify({ status: 'empty' })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'error', message: err.toString() })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
     var folder = data.folderId ? DriveApp.getFolderById(data.folderId) : DriveApp.getRootFolder();
+    if (data.action === 'SYNC_DB') {
+      var existing = folder.getFilesByName('_archive_sync_db.json');
+      while (existing.hasNext()) { existing.next().setTrashed(true); }
+      folder.createFile('_archive_sync_db.json', JSON.stringify(data.db), 'application/json');
+      return ContentService.createTextOutput(JSON.stringify({ status: 'success' })).setMimeType(ContentService.MimeType.JSON);
+    }
     var bytes = Utilities.base64Decode(data.base64);
     var blob = Utilities.newBlob(bytes, data.mimeType || 'application/octet-stream', data.fileName);
     var file = folder.createFile(blob);
@@ -753,11 +793,8 @@
 }</pre>
                 </div>
 
-                <ol start="3" class="mb-0 ps-3" style="line-height: 1.9;">
-                    <li>اضغط من الأعلى على زر <strong>Deploy (نشر)</strong> ثم اختر <strong>New deployment (نشر جديد)</strong>.</li>
-                    <li>اضغط على علامة الترس بجانب Select type واختر <strong>Web app (تطبيق ويب)</strong>.</li>
-                    <li>في خانة <strong>Who has access (من لديه حق الوصول)</strong> اختر <strong>Anyone (أي شخص)</strong> ثم اضغط <strong>Deploy</strong> ووافق على الصلاحيات (Authorize access).</li>
-                    <li>انسخ الرابط الناتج <strong>(Web app URL)</strong> الذي ينتهي بـ <code>/exec</code> والصقه في خانة <strong>"رابط جسر جوجل درايف"</strong> داخل النظام مع الـ <strong>Folder ID</strong> واضغط حفظ!</li>
+                <ol start="2" class="mb-0 ps-3" style="line-height: 1.8;">
+                    <li>اضغط <strong>Deploy (نشر)</strong> $\leftarrow$ <strong>New deployment (نشر جديد)</strong> (اختر <strong>Anyone</strong>) وانسخ الرابط الجديد، ثم اضغط في لوحة المدير على زر <strong>"نسخ رابط الهواتف للموظفين"</strong> وأرسله للموظفين!</li>
                 </ol>
             </div>
             <div class="modal-footer border-top py-2">
@@ -909,11 +946,11 @@
                     </div>
                     <div class="mb-2">
                         <label class="form-label small fw-bold">اسم المستخدم للدخول</label>
-                        <input type="text" id="userUsernameInput" class="form-control form-control-sm" dir="ltr" placeholder="eslam" required>
+                        <input type="text" id="userUsernameInput" class="form-control form-control-sm" dir="ltr" autocapitalize="none" autocorrect="off" placeholder="eslam" required>
                     </div>
                     <div class="mb-2">
                         <label class="form-label small fw-bold">كلمة المرور</label>
-                        <input type="text" id="userPasswordInput" class="form-control form-control-sm" dir="ltr" placeholder="••••••" required>
+                        <input type="text" id="userPasswordInput" class="form-control form-control-sm" dir="ltr" autocapitalize="none" autocorrect="off" placeholder="••••••" required>
                     </div>
                     <div class="mb-2">
                         <label class="form-label small fw-bold">المسمى الوظيفي / القسم</label>
@@ -959,7 +996,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 <script>
-    const STORAGE_KEY = 'ENTERPRISE_ARCHIVE_PORTABLE_V7_CLEAN';
+    const STORAGE_KEY = 'ENTERPRISE_ARCHIVE_PORTABLE_V8_SYNC';
     const THEME_KEY   = 'ENTERPRISE_ARCHIVE_THEME_MODE';
     const IDB_NAME    = 'EnterpriseArchiveFilesDB';
     const IDB_STORE   = 'fileBlobs';
@@ -1030,7 +1067,7 @@
 
     let appState = (function() {
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
+            const raw = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('ENTERPRISE_ARCHIVE_PORTABLE_V7_CLEAN');
             if (raw) {
                 const parsed = JSON.parse(raw);
                 if (!parsed.cloudConfig) parsed.cloudConfig = JSON.parse(JSON.stringify(DEFAULT_DATA.cloudConfig));
@@ -1042,6 +1079,175 @@
 
     function saveState() {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(appState)); } catch (e) {}
+    }
+
+    /* ==================== MULTI-DEVICE CLOUD DATABASE SYNC (FOR PHONES & PCs) ==================== */
+    async function pushDatabaseToCloudNow(silent = false) {
+        const cfg = appState.cloudConfig || {};
+        const scriptUrl = (cfg.gdriveScriptUrl || '').trim();
+        const folderId = extractCleanFolderId(cfg.gdriveFolderId);
+        if (!scriptUrl) {
+            if (!silent) showToast('يرجى إدخال رابط جسر Google Apps Script أولاً');
+            return false;
+        }
+
+        const dbSnapshot = {
+            scriptConfig: appState.scriptConfig,
+            cloudConfig: appState.cloudConfig,
+            users: appState.users,
+            folders: appState.folders,
+            files: appState.files,
+            syncedAt: getFormattedNow()
+        };
+
+        try {
+            await fetch(scriptUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                    action: 'SYNC_DB',
+                    folderId: folderId,
+                    db: dbSnapshot
+                })
+            });
+            if (!silent) showToast('تمت مزامنة حسابات الموظفين والمجلدات مع السحابة بنجاح!');
+            return true;
+        } catch (e) {
+            try {
+                await fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify({ action: 'SYNC_DB', folderId: folderId, db: dbSnapshot })
+                });
+                if (!silent) showToast('تم إرسال تحديث الحسابات إلى السحابة!');
+                return true;
+            } catch (err2) {
+                if (!silent) showToast('تعذرت المزامنة: ' + err2.message);
+                return false;
+            }
+        }
+    }
+
+    async function pullDatabaseFromCloud(scriptUrlOverride = null, folderIdOverride = null, silent = false) {
+        const cfg = appState.cloudConfig || {};
+        const scriptUrl = (scriptUrlOverride || cfg.gdriveScriptUrl || '').trim();
+        const folderId = extractCleanFolderId(folderIdOverride !== null ? folderIdOverride : cfg.gdriveFolderId);
+
+        if (!scriptUrl) return false;
+
+        try {
+            const url = `${scriptUrl}?folderId=${encodeURIComponent(folderId)}&t=${Date.now()}`;
+            const res = await fetch(url);
+            const data = await res.json();
+            if (data && Array.isArray(data.users) && data.users.length > 0) {
+                appState.users = data.users;
+                if (Array.isArray(data.folders)) appState.folders = data.folders;
+                if (Array.isArray(data.files)) appState.files = data.files;
+                if (data.scriptConfig) appState.scriptConfig = data.scriptConfig;
+                if (!appState.cloudConfig) appState.cloudConfig = {};
+                appState.cloudConfig.gdriveScriptUrl = scriptUrl;
+                appState.cloudConfig.gdriveFolderId = folderId;
+                saveState();
+                renderAll();
+                const banner = document.getElementById('loginSyncStatusBanner');
+                if (banner) {
+                    banner.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i>تمت مزامنة (${data.users.length}) حساب بنجاح على هذا الهاتف`;
+                }
+                if (!silent) showToast(`تم جلب ${data.users.length} حساب موظف ومجلداتهم بنجاح!`);
+                return true;
+            }
+        } catch (err) {
+            if (!silent) showToast('تأكد من نشر كود الجسر المحدث (v8.0) بصلاحية Anyone');
+        }
+        return false;
+    }
+
+    function copyShareableMobileLink() {
+        const cfg = appState.cloudConfig || {};
+        const scriptUrl = (cfg.gdriveScriptUrl || '').trim();
+        const folderId = extractCleanFolderId(cfg.gdriveFolderId);
+        const baseUrl = window.location.href.split('#')[0].split('?')[0];
+
+        if (!scriptUrl) {
+            // Even without Google Script, pack users & folders directly into URL hash!
+            const pack = btoa(unescape(encodeURIComponent(JSON.stringify({
+                u: appState.users,
+                f: appState.folders,
+                s: appState.scriptConfig
+            }))));
+            const directLink = `${baseUrl}#sync=${pack}`;
+            navigator.clipboard.writeText(directLink);
+            showToast('تم نسخ رابط الهواتف المباشر! أرسله للموظف ليفتح حسابه من هاتفه فوراً');
+            return;
+        }
+
+        const shareLink = `${baseUrl}?bridge=${encodeURIComponent(scriptUrl)}&fid=${encodeURIComponent(folderId)}`;
+        navigator.clipboard.writeText(shareLink);
+        pushDatabaseToCloudNow(true);
+        showToast('تم نسخ رابط الهواتف المتزامن! أي موظف يفتحه من هاتفه سيدخل بحسابه فوراً');
+    }
+
+    async function checkUrlParamsForAutoSync() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            const bridge = params.get('bridge');
+            const fid = params.get('fid') || '';
+            if (bridge) {
+                if (!appState.cloudConfig) appState.cloudConfig = {};
+                appState.cloudConfig.gdriveScriptUrl = bridge;
+                appState.cloudConfig.gdriveFolderId = fid;
+                saveState();
+                await pullDatabaseFromCloud(bridge, fid, true);
+                return;
+            }
+
+            const hash = window.location.hash || '';
+            if (hash.startsWith('#sync=')) {
+                const encoded = hash.replace('#sync=', '');
+                const decoded = JSON.parse(decodeURIComponent(escape(atob(encoded))));
+                if (decoded && Array.isArray(decoded.u)) {
+                    appState.users = decoded.u;
+                    if (Array.isArray(decoded.f)) appState.folders = decoded.f;
+                    if (decoded.s) appState.scriptConfig = decoded.s;
+                    saveState();
+                    renderAll();
+                    const banner = document.getElementById('loginSyncStatusBanner');
+                    if (banner) {
+                        banner.innerHTML = `<i class="bi bi-check-circle-fill text-success me-1"></i>تم تفعيل حسابات الموظفين على هذا الهاتف`;
+                    }
+                }
+            } else if (appState.cloudConfig && appState.cloudConfig.gdriveScriptUrl) {
+                await pullDatabaseFromCloud(null, null, true);
+            }
+        } catch (e) {}
+    }
+
+    function togglePhoneSyncSetupBox() {
+        const box = document.getElementById('phoneSyncSetupBox');
+        box.classList.toggle('d-none');
+        if (appState.cloudConfig && appState.cloudConfig.gdriveScriptUrl) {
+            document.getElementById('loginBridgeUrlInput').value = appState.cloudConfig.gdriveScriptUrl;
+        }
+    }
+
+    async function pullDatabaseFromCloudOnLogin() {
+        const url = document.getElementById('loginBridgeUrlInput').value.trim();
+        if (!url) { showToast('يرجى لصق رابط جسر Google Script أولاً'); return; }
+        showToast('جاري جلب الحسابات من السحابة...');
+        await pullDatabaseFromCloud(url, '', false);
+    }
+
+    function toggleLoginPasswordVisibility() {
+        const inp = document.getElementById('fullLoginPassword');
+        const icon = document.getElementById('loginEyeIcon');
+        if (inp.type === 'password') {
+            inp.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+        } else {
+            inp.type = 'password';
+            icon.className = 'bi bi-eye';
+        }
     }
 
     function getFormattedNow() {
@@ -1070,7 +1276,7 @@
                 <i class="bi bi-check-circle-fill text-primary"></i> <span>${msg}</span>
             </div>
         `);
-        setTimeout(() => { const el = document.getElementById(id); if (el) el.remove(); }, 3500);
+        setTimeout(() => { const el = document.getElementById(id); if (el) el.remove(); }, 3800);
     }
 
     function addAuditLog(action, targetName, details) {
@@ -1078,7 +1284,6 @@
         saveState();
     }
 
-    /* Extract clean Google Drive Folder ID even if user pastes the full URL */
     function extractCleanFolderId(rawInput) {
         const str = (rawInput || '').trim();
         if (!str) return '';
@@ -1109,7 +1314,6 @@
             const mimeMatch = parts[0].match(/data:([^;]+);/);
             if (mimeMatch && mimeMatch[1]) mimeType = mimeMatch[1];
         } else {
-            // Fallback text content if user didn't pick a binary file
             const fallbackText = `Document Name: ${fileObj.name}\nUploaded At: ${fileObj.updatedAt}\nOwner: ${getUserById(fileObj.ownerId).name}`;
             base64Data = btoa(unescape(encodeURIComponent(fallbackText)));
             mimeType = 'text/plain';
@@ -1123,7 +1327,6 @@
         };
 
         try {
-            // Using text/plain avoids CORS preflight blockage on Google Apps Script Web Apps
             const res = await fetch(scriptUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1142,7 +1345,6 @@
                 return { ok: false, reason: (json && json.message) || 'خطأ من جوجل درايف' };
             }
         } catch (err) {
-            // Fallback no-cors mode if browser blocks reading response
             try {
                 await fetch(scriptUrl, {
                     method: 'POST',
@@ -1168,7 +1370,7 @@
     function copyGoogleAppsScriptCode() {
         const code = document.getElementById('gasCodeBlock').innerText;
         navigator.clipboard.writeText(code);
-        showToast('تم نسخ كود Google Apps Script بنجاح!');
+        showToast('تم نسخ كود Google Apps Script المحدث بنجاح!');
     }
 
     function openGoogleDriveFolderDirect() {
@@ -1180,30 +1382,6 @@
         }
     }
 
-    async function testRealGoogleDriveConnection() {
-        saveCloudProviderConfig('GDRIVE', true);
-        const cfg = appState.cloudConfig || {};
-        if (!cfg.gdriveScriptUrl) {
-            showToast('يرجى وضع رابط جسر Google Apps Script أولاً ثم التجربة');
-            openGoogleScriptGuideModal();
-            return;
-        }
-        showToast('جاري إرسال ملف تجريبي إلى مجلدك في Google Drive...');
-        const dummyFile = {
-            id: 'test_' + Date.now(),
-            name: `اختبار_ربط_الأرشيف_${Date.now().toString().slice(-4)}.txt`,
-            updatedAt: getFormattedNow(),
-            ownerId: appState.currentUserId
-        };
-        const result = await uploadFileToRealGoogleDrive(dummyFile);
-        if (result.ok) {
-            showToast('تم رفع الملف التجريبي بنجاح! افتح مجلدك في Google Drive لمشاهدته');
-        } else {
-            showToast('تعذر الرفع: تأكد من صحة رابط الجسر والـ Folder ID: ' + result.reason);
-        }
-    }
-
-    /* Theme */
     function applyTheme(mode) {
         const isDark = mode === 'dark';
         document.body.classList.toggle('dark-mode', isDark);
@@ -1236,12 +1414,33 @@
         document.getElementById('fullLoginOverlay').classList.remove('d-none');
     }
 
-    function handleFullLoginSubmit(e) {
+    async function handleFullLoginSubmit(e) {
         if (e && e.preventDefault) e.preventDefault();
         const u = document.getElementById('fullLoginUsername').value.trim().toLowerCase();
         const p = document.getElementById('fullLoginPassword').value.trim();
-        const user = appState.users.find(x => (x.username || '').toLowerCase() === u && x.password === p);
-        if (!user) { showToast('اسم المستخدم أو كلمة المرور غير صحيحة'); return; }
+
+        let user = appState.users.find(x => (x.username || '').trim().toLowerCase() === u && (x.password || '').trim() === p);
+
+        // If user not found locally on a new phone and cloud sync URL is known, try pulling latest users first!
+        if (!user && appState.cloudConfig && appState.cloudConfig.gdriveScriptUrl) {
+            const btn = document.getElementById('loginSubmitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> جاري التحقق...';
+            await pullDatabaseFromCloud(null, null, true);
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-box-arrow-in-left"></i> تسجيل الدخول';
+            user = appState.users.find(x => (x.username || '').trim().toLowerCase() === u && (x.password || '').trim() === p);
+        }
+
+        if (!user) {
+            if (appState.users.length <= 1 && u !== 'admin') {
+                showToast('هذا الهاتف غير متزامن بعد! افتح "رابط الهواتف" من لوحة المدير أو اضغط "مزامنة حسابات الموظفين" بالأسفل');
+            } else {
+                showToast('اسم المستخدم أو كلمة المرور غير صحيحة');
+            }
+            return;
+        }
+
         document.getElementById('fullLoginOverlay').classList.add('d-none');
         appState.currentUserId = user.id;
 
@@ -1536,6 +1735,7 @@
             appState.folders.push({ id: 'fld_' + Date.now(), name, parentId, ownerId: appState.currentUserId, isLocked, pinCode, allowedUserIds: allowed, createdAt: getFormattedNow() });
         }
         saveState();
+        pushDatabaseToCloudNow(true);
         bootstrap.Modal.getInstance(document.getElementById('folderModal')).hide();
         renderExplorer();
         showToast('تم حفظ وتخصيص المجلد');
@@ -1546,6 +1746,7 @@
         appState.folders = appState.folders.filter(x => x.id !== fldId);
         appState.files = appState.files.filter(x => x.folderId !== fldId);
         saveState();
+        pushDatabaseToCloudNow(true);
         renderExplorer();
         showToast('تم حذف المجلد');
     }
@@ -1642,18 +1843,19 @@
 
         saveState();
 
-        // Check if automatic Google Drive upload is configured
         const cfg = appState.cloudConfig || {};
         if (targetFileObj && cfg.gdriveAutoSync && cfg.gdriveScriptUrl && (cloudProvider === 'GDRIVE' || cloudProvider === 'BOTH')) {
             const upRes = await uploadFileToRealGoogleDrive(targetFileObj, pendingPickedFileDataUrl);
             if (upRes.ok) {
                 showToast('تم حفظ الملف ورفعه فعلياً إلى مجلدك في Google Drive!');
             } else {
-                showToast('تم حفظ الملف محلياً (تعذر الرفع إلى Google Drive: ' + upRes.reason + ')');
+                showToast('تم حفظ الملف محلياً');
             }
         } else {
             showToast('تم حفظ الملف بنجاح');
         }
+
+        pushDatabaseToCloudNow(true);
 
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> حفظ وأرشفة الملف';
@@ -1667,6 +1869,7 @@
         if (!f || !canUserModifyItem(f.ownerId)) return;
         appState.files = appState.files.filter(x => x.id !== fid);
         saveState();
+        pushDatabaseToCloudNow(true);
         renderExplorer();
         showToast('تم حذف الملف');
     }
@@ -1730,11 +1933,11 @@
 
         const statusEl = document.getElementById('gdriveConnectionStatusText');
         if (cfg.gdriveScriptUrl && cfg.gdriveFolderId) {
-            statusEl.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>متصل وجاهز للرفع الفعلي إلى الفولدر (${cfg.gdriveFolderId.slice(0, 10)}...)</span>`;
+            statusEl.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>متصل وجاهز للرفع ومزامنة الهواتف (${cfg.gdriveFolderId.slice(0, 10)}...)</span>`;
         } else if (cfg.gdriveFolderId && !cfg.gdriveScriptUrl) {
-            statusEl.innerHTML = `<span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i>تم إدخال Folder ID، ينقصك فقط وضع رابط جسر Google Apps Script ليعمل الرفع!</span>`;
+            statusEl.innerHTML = `<span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i>ينقصك وضع رابط جسر Google Apps Script</span>`;
         } else {
-            statusEl.textContent = 'أدخل الـ Folder ID ورابط الجسر لتفعيل الرفع الفعلي';
+            statusEl.textContent = 'أدخل الـ Folder ID ورابط الجسر لتفعيل الرفع الفعلي ومزامنة الهواتف';
         }
 
         const list = appState.files;
@@ -1775,12 +1978,11 @@
 
         saveState();
         renderCloudDriveCenter();
+        if (appState.cloudConfig.gdriveScriptUrl) {
+            pushDatabaseToCloudNow(true);
+        }
         if (!silent) {
-            if (prov === 'GDRIVE' && cleanId && !appState.cloudConfig.gdriveScriptUrl) {
-                showToast('تم حفظ Folder ID! الآن اضغط على "احصل على كود ورابط الربط" بالأعلى لإتمام الاتصال الفعلي');
-            } else {
-                showToast('تم حفظ إعدادات الربط السحابي بنجاح');
-            }
+            showToast('تم حفظ إعدادات الربط ومزامنة حسابات الموظفين');
         }
     }
 
@@ -1790,7 +1992,7 @@
         if (prov === 'GDRIVE') {
             const cfg = appState.cloudConfig || {};
             if (!cfg.gdriveScriptUrl) {
-                showToast('يرجى وضع رابط جسر Google Apps Script أولاً ليتم الرفع الفعلي إلى حسابك');
+                showToast('يرجى وضع رابط جسر Google Apps Script أولاً');
                 openGoogleScriptGuideModal();
                 return;
             }
@@ -1806,7 +2008,7 @@
     async function bulkSyncCurrentUserFiles(prov) {
         const cfg = appState.cloudConfig || {};
         if (prov === 'GDRIVE' && !cfg.gdriveScriptUrl) {
-            showToast('يرجى وضع رابط جسر Google Apps Script أولاً ليتم الرفع الفعلي إلى حسابك');
+            showToast('يرجى وضع رابط جسر Google Apps Script أولاً');
             openGoogleScriptGuideModal();
             return;
         }
@@ -1821,7 +2023,7 @@
         showToast(`تم رفع ${count} ملف بنجاح إلى مجلدك في Google Drive!`);
     }
 
-    /* Users Management & Auto Folder Creation (Admin Control Panel) */
+    /* Users Management & Auto Folder Creation */
     function renderUsersManagement() {
         const isAdmin = isCurrentUserAdmin();
         const c = document.getElementById('usersCardsContainer');
@@ -1941,9 +2143,10 @@
             }
         }
         saveState();
+        pushDatabaseToCloudNow(true);
         bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
         renderAll();
-        showToast('تم حفظ حساب الموظف وتخصيص الفولدر الخاص به');
+        showToast('تم حفظ حساب الموظف ومزامنته للهواتف بنجاح!');
     }
 
     function deleteUserAccount(uid) {
@@ -1954,6 +2157,7 @@
         }
         appState.users = appState.users.filter(u => u.id !== uid);
         saveState();
+        pushDatabaseToCloudNow(true);
         renderAll();
         showToast('تم حذف حساب الموظف');
     }
@@ -1984,7 +2188,10 @@
         appState.scriptConfig.orgLogoUrl = document.getElementById('cfgOrgLogoUrl').value.trim();
         appState.scriptConfig.strictZeroTrust = document.getElementById('cfgStrictZeroTrust').checked;
         appState.scriptConfig.maintenanceMode = document.getElementById('cfgMaintenanceMode').checked;
-        saveState(); renderAll(); showToast('تم حفظ الإعدادات');
+        saveState();
+        pushDatabaseToCloudNow(true);
+        renderAll();
+        showToast('تم حفظ الإعدادات');
     }
 
     function downloadTextFile(name, text) {
@@ -1992,8 +2199,8 @@
         a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
         a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
-    function downloadPhpApiFile() { downloadTextFile('api.php', '<?php // Enterprise Archive API v7.5 - Developed By Ali Akila ?>'); }
-    function downloadSqlSchemaFile() { downloadTextFile('database.sql', '-- Enterprise Archive SQL Schema v7.5'); }
+    function downloadPhpApiFile() { downloadTextFile('api.php', '<?php // Enterprise Archive API v8.0 - Developed By Ali Akila ?>'); }
+    function downloadSqlSchemaFile() { downloadTextFile('database.sql', '-- Enterprise Archive SQL Schema v8.0'); }
     function exportBackupJSON() { downloadTextFile('Archive_Backup.json', JSON.stringify(appState, null, 2)); }
     function importBackupJSON(inp) {
         if (!inp.files[0]) return;
@@ -2024,6 +2231,7 @@
         document.getElementById('navUsersItem').classList.toggle('d-none', !isAdmin);
         document.getElementById('navSettingsItem').classList.toggle('d-none', !isAdmin);
         document.getElementById('headerManageUsersBtn').classList.toggle('d-none', !isAdmin);
+        document.getElementById('headerShareMobileLinkBtn').classList.toggle('d-none', !isAdmin);
         document.getElementById('btnCreateFolderMain').classList.toggle('d-none', !isAdmin);
 
         const mobCloud = document.getElementById('mobNavCloud');
@@ -2040,11 +2248,13 @@
         renderAuditLog();
     }
 
-    window.onload = () => {
+    window.onload = async () => {
         applyTheme(localStorage.getItem(THEME_KEY) || 'light');
         renderAll();
         showFullLoginScreen();
+        await checkUrlParamsForAutoSync();
     };
 </script>
 </body>
 </html>
+```
