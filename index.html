@@ -611,14 +611,19 @@
             <!-- ==================== VIEW: AUDIT LOG ==================== -->
             <div id="viewAudit" class="d-none">
                 <div class="clean-card overflow-hidden">
-                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                    <div class="p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
                         <span class="fw-bold small">سجل النشاط والأمان</span>
-                        <select id="auditFilterAction" class="form-select form-select-sm" style="width: auto;" onchange="renderAuditLog()">
-                            <option value="ALL">الكل</option>
-                            <option value="CREATE_FILE">رفع ملف</option>
-                            <option value="UPDATE_FILE">تعديل</option>
-                            <option value="CLOUD_SYNC">مزامنة سحابية</option>
-                        </select>
+                        <div class="d-flex align-items-center gap-2">
+                            <select id="auditFilterAction" class="form-select form-select-sm" style="width: auto;" onchange="renderAuditLog()">
+                                <option value="ALL">الكل</option>
+                                <option value="CREATE_FILE">رفع ملف</option>
+                                <option value="UPDATE_FILE">تعديل</option>
+                                <option value="CLOUD_SYNC">مزامنة سحابية</option>
+                            </select>
+                            <button class="btn btn-success btn-sm clean-btn py-1 d-none" id="btnExportAuditExcel" onclick="exportAuditLogToExcel()">
+                                <i class="bi bi-file-earmark-excel-fill"></i> <span>تصدير Excel</span>
+                            </button>
+                        </div>
                     </div>
                     <div id="auditListContainer"></div>
                 </div>
@@ -943,8 +948,13 @@ function doPost(e) {
                         <input type="text" id="userJobInput" class="form-control form-control-sm" placeholder="مثال: survey" required>
                     </div>
                     <div class="mb-2" id="autoCreateFolderBox">
-                        <label class="form-label small fw-bold">اسم الفولدر المخصص للموظف</label>
+                        <label class="form-label small fw-bold">اسم الفولدر المخصص للموظف (داخل النظام)</label>
                         <input type="text" id="userCustomFolderNameInput" class="form-control form-control-sm" placeholder="يُنشأ تلقائياً باسم الموظف">
+                    </div>
+                    <div class="mb-2" id="userGdriveFolderBox">
+                        <label class="form-label small fw-bold text-success"><i class="bi bi-google me-1"></i>معرف فولدر Google Drive الخاص بالموظف</label>
+                        <input type="text" id="userGdriveFolderIdInput" class="form-control form-control-sm" dir="ltr" placeholder="Folder ID أو رابط المجلد على Drive">
+                        <small class="text-secondary" style="font-size:0.7rem;">يُرفع إليه ملفات هذا الموظف فقط بشكل مستقل</small>
                     </div>
                     <div class="mb-2">
                         <label class="form-label small fw-bold">نوع الصلاحية</label>
@@ -1270,7 +1280,9 @@ function doPost(e) {
     /* ==================== REAL GOOGLE DRIVE UPLOAD ENGINE ==================== */
     async function uploadFileToRealGoogleDrive(fileObj, dataUrlOverride = null) {
         const cfg = appState.cloudConfig || {};
-        const folderId = extractCleanFolderId(cfg.gdriveFolderId);
+        const fileOwner = getUserById(fileObj.ownerId);
+        const ownerSpecificFolderId = extractCleanFolderId(fileOwner.gdriveFolderId);
+        const folderId = ownerSpecificFolderId || extractCleanFolderId(cfg.gdriveFolderId);
         const scriptUrl = (cfg.gdriveScriptUrl || '').trim();
 
         if (!scriptUrl) {
@@ -2048,12 +2060,14 @@ function doPost(e) {
             document.getElementById('userPasswordInput').value = u.password;
             document.getElementById('userJobInput').value = u.role;
             document.getElementById('userCustomFolderNameInput').value = assignedFolder ? assignedFolder.name : `فولدر - ${u.name}`;
+            document.getElementById('userGdriveFolderIdInput').value = u.gdriveFolderId || '';
             document.getElementById('userRoleTypeInput').value = u.isAdmin ? 'admin' : 'employee';
         } else {
             document.getElementById('userModalTitle').textContent = 'إنشاء حساب وفولدر موظف';
             document.getElementById('userForm').reset();
             document.getElementById('editUserIdInput').value = '';
             document.getElementById('userCustomFolderNameInput').value = '';
+            document.getElementById('userGdriveFolderIdInput').value = '';
         }
         new bootstrap.Modal(document.getElementById('userModal')).show();
     }
@@ -2067,6 +2081,7 @@ function doPost(e) {
         const password = document.getElementById('userPasswordInput').value.trim();
         const role = document.getElementById('userJobInput').value.trim();
         const customFolderName = document.getElementById('userCustomFolderNameInput').value.trim() || `ملفات - ${name}`;
+        const gdriveFolderId = extractCleanFolderId(document.getElementById('userGdriveFolderIdInput').value);
         const isAdmin = document.getElementById('userRoleTypeInput').value === 'admin';
 
         const exists = appState.users.find(x => x.username.toLowerCase() === username.toLowerCase() && x.id !== id);
@@ -2080,6 +2095,7 @@ function doPost(e) {
             const u = appState.users.find(x => x.id === id);
             if (u) {
                 u.name = name; u.username = username; u.password = password; u.role = role; u.isAdmin = isAdmin;
+                u.gdriveFolderId = gdriveFolderId;
                 if (!isAdmin) {
                     let empFolder = getEmployeeAssignedFolder(u.id);
                     if (empFolder) {
@@ -2102,7 +2118,7 @@ function doPost(e) {
         } else {
             const newUserId = 'emp_' + Date.now();
             const randomColor = colors[appState.users.length % colors.length];
-            appState.users.push({ id: newUserId, name, username, password, role, isAdmin, color: randomColor });
+            appState.users.push({ id: newUserId, name, username, password, role, isAdmin, gdriveFolderId, color: randomColor });
 
             if (!isAdmin) {
                 appState.folders.push({
@@ -2122,7 +2138,7 @@ function doPost(e) {
         pushDatabaseToCloudNow(true);
         bootstrap.Modal.getInstance(document.getElementById('userModal')).hide();
         renderAll();
-        showToast('تم حفظ حساب الموظف ومزامنته للهواتف بنجاح!');
+        showToast('تم حفظ حساب الموظف وربطه بفولدر Google Drive الخاص به!');
     }
 
     function deleteUserAccount(uid) {
@@ -2156,18 +2172,38 @@ function doPost(e) {
         }).join('');
     }
 
-    /* Settings & Package */
-    function saveScriptSettings(e) {
-        e.preventDefault();
-        appState.scriptConfig.siteName = document.getElementById('cfgSiteName').value.trim();
-        appState.scriptConfig.orgDepartment = document.getElementById('cfgOrgDepartment').value.trim();
-        appState.scriptConfig.orgLogoUrl = document.getElementById('cfgOrgLogoUrl').value.trim();
-        appState.scriptConfig.strictZeroTrust = document.getElementById('cfgStrictZeroTrust').checked;
-        appState.scriptConfig.maintenanceMode = document.getElementById('cfgMaintenanceMode').checked;
-        saveState();
-        pushDatabaseToCloudNow(true);
-        renderAll();
-        showToast('تم حفظ الإعدادات');
+    function exportAuditLogToExcel() {
+        if (!isCurrentUserAdmin()) return;
+        const flt = document.getElementById('auditFilterAction').value;
+        const logs = appState.auditLogs.filter(l => (flt === 'ALL' || l.action === flt));
+        if (logs.length === 0) {
+            showToast('لا توجد بيانات في السجل لتصديرها');
+            return;
+        }
+
+        const headers = ['التاريخ والوقت', 'اسم الموظف', 'المسمى الوظيفي', 'نوع العملية', 'العنصر / الملف', 'التفاصيل'];
+        const rows = logs.map(l => {
+            const u = getUserById(l.userId);
+            return [
+                l.timestamp || '',
+                u.name || '',
+                u.role || '',
+                l.action || '',
+                l.targetName || '',
+                l.details || ''
+            ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(',');
+        });
+
+        const csvContent = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const dateStr = new Date().toISOString().slice(0, 10);
+        link.href = URL.createObjectURL(blob);
+        link.download = `سجل_الأرشيف_${dateStr}.csv`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast('تم تحميل السجل بصيغة Excel بنجاح!');
     }
 
     function downloadTextFile(name, text) {
@@ -2209,6 +2245,8 @@ function doPost(e) {
         document.getElementById('headerManageUsersBtn').classList.toggle('d-none', !isAdmin);
         document.getElementById('headerShareMobileLinkBtn').classList.toggle('d-none', !isAdmin);
         document.getElementById('btnCreateFolderMain').classList.toggle('d-none', !isAdmin);
+        const btnExportExcel = document.getElementById('btnExportAuditExcel');
+        if (btnExportExcel) btnExportExcel.classList.toggle('d-none', !isAdmin);
 
         const mobCloud = document.getElementById('mobNavCloud');
         if (mobCloud) mobCloud.classList.toggle('d-none', !isAdmin);
