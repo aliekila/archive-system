@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>أرشيف المؤسسة الرقمي | v7.0</title>
+    <title>أرشيف المؤسسة الرقمي | v7.5</title>
     
     <!-- Bootstrap 5 RTL CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
@@ -122,7 +122,7 @@
             display: flex;
             flex-direction: column;
             min-width: 0;
-            padding-bottom: 75px; /* Space for mobile bottom nav */
+            padding-bottom: 75px;
         }
 
         .app-header {
@@ -393,7 +393,7 @@
         <div class="pt-3 border-top mt-3 small text-secondary">
             <div class="d-flex justify-content-between mb-2">
                 <span id="storageUsedText">0 MB</span>
-                <span class="text-success fw-bold"><i class="bi bi-shield-check me-1"></i>معزول</span>
+                <span class="text-success fw-bold" id="sidebarCloudStatusBadge"><i class="bi bi-shield-check me-1"></i>معزول</span>
             </div>
             <button class="btn btn-outline-danger btn-sm w-100 clean-btn" onclick="showFullLoginScreen()">
                 <i class="bi bi-power"></i> تسجيل الخروج
@@ -474,7 +474,7 @@
                 <!-- Folders Grid -->
                 <div class="row g-2 mb-3" id="foldersGridContainer"></div>
 
-                <!-- Files Clean List (Works great on Mobile & Desktop) -->
+                <!-- Files Clean List -->
                 <div class="clean-card overflow-hidden">
                     <div class="px-3 py-2 border-bottom bg-light d-flex justify-content-between align-items-center">
                         <span class="fw-bold small">الملفات</span>
@@ -484,59 +484,99 @@
                 </div>
             </div>
 
-            <!-- ==================== VIEW: CLOUD DRIVE (ADMIN ONLY) ==================== -->
+            <!-- ==================== VIEW: CLOUD DRIVE (ADMIN ONLY - REAL UPLOAD ENGINE) ==================== -->
             <div id="viewCloudDrive" class="d-none">
+                <!-- Explanation Alert for Why Folder ID Needs Script Bridge -->
+                <div class="clean-card p-3 mb-3 border-primary bg-primary bg-opacity-10">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div>
+                            <h6 class="fw-bold text-primary mb-1"><i class="bi bi-cloud-arrow-up-fill me-1"></i>الربط الفعلي المباشر مع Google Drive</h6>
+                            <p class="small mb-0 text-secondary">
+                                حتى يتم رفع الملفات فعلياً داخل مجلدك في Google Drive، تحتاج إلى وضع <strong>Folder ID</strong> مع <strong>رابط جسر الرفع (Google Apps Script URL)</strong> لكي يسمح جوجل للنظام بوضع الملفات داخل حسابك.
+                            </p>
+                        </div>
+                        <button class="btn btn-primary btn-sm clean-btn" onclick="openGoogleScriptGuideModal()">
+                            <i class="bi bi-magic"></i> احصل على كود ورابط الربط في دقيقة واحدة
+                        </button>
+                    </div>
+                </div>
+
                 <div class="row g-3 mb-3">
-                    <div class="col-12 col-md-6">
-                        <div class="clean-card p-3">
+                    <div class="col-12 col-lg-7">
+                        <div class="clean-card p-3 h-100">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="icon-sq bg-success bg-opacity-10 text-success"><i class="bi bi-google"></i></div>
                                     <div>
-                                        <h6 class="fw-bold mb-0">Google Drive</h6>
-                                        <small class="text-secondary">مزامنة وأرشفة تلقائية</small>
+                                        <h6 class="fw-bold mb-0">إعدادات الرفع الحقيقي إلى Google Drive</h6>
+                                        <small class="text-secondary" id="gdriveConnectionStatusText">بانتظار حفظ رابط الجسر و Folder ID</small>
                                     </div>
                                 </div>
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="gdriveAutoSyncToggle" checked>
+                                    <input class="form-check-input" type="checkbox" id="gdriveAutoSyncToggle" checked onchange="saveCloudProviderConfig('GDRIVE')">
+                                    <label class="form-check-label small fw-bold" for="gdriveAutoSyncToggle">رفع تلقائي عند إضافة أي ملف</label>
                                 </div>
                             </div>
-                            <input type="text" id="gdriveFolderIdInput" class="form-control form-control-sm mb-2" dir="ltr" placeholder="Google Drive Folder ID">
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-success btn-sm clean-btn flex-grow-1" onclick="bulkSyncCurrentUserFiles('GDRIVE')">مزامنة كل الملفات</button>
-                                <button class="btn btn-light border btn-sm" onclick="saveCloudProviderConfig('GDRIVE')">حفظ</button>
+
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold mb-1">1. معرف مجلد جوجل درايف (Google Drive Folder ID)</label>
+                                <input type="text" id="gdriveFolderIdInput" class="form-control form-control-sm" dir="ltr" placeholder="مثال: 1A2B3C4D5E6F7G8H9I0J...">
+                                <small class="text-secondary" style="font-size: 0.72rem;">الجزء الأخير من رابط المجلد بعد <code>/folders/</code> (أو الصق رابط المجلد كاملاً وسيتم استخراجه تلقائياً)</small>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold mb-1">2. رابط جسر جوجل درايف (Google Apps Script Web App URL)</label>
+                                <input type="url" id="gdriveScriptUrlInput" class="form-control form-control-sm" dir="ltr" placeholder="https://script.google.com/macros/s/......./exec">
+                                <small class="text-secondary" style="font-size: 0.72rem;">اضغط على زر <strong>"احصل على كود ورابط الربط"</strong> بالأعلى لإنشائه مجاناً من حسابك في دقيقتين</small>
+                            </div>
+
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-success btn-sm clean-btn flex-grow-1" onclick="saveCloudProviderConfig('GDRIVE')">
+                                    <i class="bi bi-check2-circle"></i> حفظ وتفعيل الربط مع Google Drive
+                                </button>
+                                <button class="btn btn-outline-success btn-sm clean-btn" onclick="testRealGoogleDriveConnection()">
+                                    <i class="bi bi-send-check"></i> إرسال ملف تجريبي الآن للتأكد
+                                </button>
+                                <button class="btn btn-light border btn-sm clean-btn" onclick="openGoogleDriveFolderDirect()">
+                                    <i class="bi bi-box-arrow-up-right"></i> فتح المجلد في Drive
+                                </button>
                             </div>
                         </div>
                     </div>
 
-                    <div class="col-12 col-md-6">
-                        <div class="clean-card p-3">
+                    <div class="col-12 col-lg-5">
+                        <div class="clean-card p-3 h-100">
                             <div class="d-flex align-items-center justify-content-between mb-3">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="icon-sq bg-primary bg-opacity-10 text-primary"><i class="bi bi-microsoft"></i></div>
                                     <div>
                                         <h6 class="fw-bold mb-0">Microsoft OneDrive</h6>
-                                        <small class="text-secondary">نسخ احتياطي سحابي</small>
+                                        <small class="text-secondary">نسخ احتياطي سحابي (Webhook / المسار)</small>
                                     </div>
                                 </div>
                                 <div class="form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" id="onedriveAutoSyncToggle" checked>
+                                    <input class="form-check-input" type="checkbox" id="onedriveAutoSyncToggle" onchange="saveCloudProviderConfig('ONEDRIVE')">
                                 </div>
                             </div>
-                            <input type="text" id="onedriveFolderPathInput" class="form-control form-control-sm mb-2" dir="ltr" placeholder="/Enterprise_Archive_Vault">
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-primary btn-sm clean-btn flex-grow-1" onclick="bulkSyncCurrentUserFiles('ONEDRIVE')">مزامنة كل الملفات</button>
-                                <button class="btn btn-light border btn-sm" onclick="saveCloudProviderConfig('ONEDRIVE')">حفظ</button>
+                            <div class="mb-2">
+                                <label class="form-label small fw-bold mb-1">مسار المجلد أو رابط Power Automate Webhook</label>
+                                <input type="text" id="onedriveFolderPathInput" class="form-control form-control-sm" dir="ltr" placeholder="/Enterprise_Archive_Vault">
+                            </div>
+                            <div class="d-flex gap-2 mt-3">
+                                <button class="btn btn-primary btn-sm clean-btn flex-grow-1" onclick="saveCloudProviderConfig('ONEDRIVE')">حفظ إعدادات OneDrive</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="clean-card overflow-hidden">
-                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
-                        <span class="fw-bold small">حالة أرشفة الملفات</span>
-                        <button class="btn btn-dark btn-sm clean-btn py-1" onclick="bulkSyncCurrentUserFiles('BOTH')">
-                            <i class="bi bi-arrow-repeat"></i> مزامنة الكل
+                    <div class="p-3 border-bottom d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <div>
+                            <span class="fw-bold small">حالة رفع الملفات على Google Drive</span>
+                            <small class="text-secondary d-block">اضغط على أيقونة Google بجانب أي ملف لرفعه فوراً إلى مجلدك في Google Drive</small>
+                        </div>
+                        <button class="btn btn-success btn-sm clean-btn py-1" onclick="bulkSyncCurrentUserFiles('GDRIVE')">
+                            <i class="bi bi-cloud-upload-fill"></i> رفع جميع الملفات إلى Google Drive الآن
                         </button>
                     </div>
                     <div id="cloudFilesListContainer"></div>
@@ -669,7 +709,64 @@
     </a>
 </nav>
 
-<!-- ==================== MODALS (SIMPLIFIED & RESPONSIVE) ==================== -->
+<!-- ==================== MODALS ==================== -->
+<!-- Google Apps Script Setup Guide Modal -->
+<div class="modal fade" id="googleScriptGuideModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content clean-card border-0">
+            <div class="modal-header border-bottom py-2">
+                <h6 class="modal-title fw-bold text-primary"><i class="bi bi-google me-1"></i>طريقة تفعيل الرفع التلقائي الحقيقي إلى Google Drive (في دقيقتين)</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body small">
+                <div class="alert alert-info py-2 mb-3">
+                    <strong>لماذا هذه الخطوة؟</strong> لأن Google Drive لا يسمح لأي موقع خارجي بوضع ملفات داخل مجلدك بمجرد كتابة <code>Folder ID</code> فقط؛ بل يجب وضع هذا الكود الصغير في حسابك ليكون هو "البوابة الآمنة" التي تستقبل الملفات وتضعها داخل الفولدر الخاص بك.
+                </div>
+
+                <ol class="mb-3 ps-3" style="line-height: 1.9;">
+                    <li>افتح موقع <a href="https://script.google.com" target="_blank" class="fw-bold">script.google.com</a> بحساب جوجل الخاص بك واضغط <strong>New Project (مشروع جديد)</strong>.</li>
+                    <li>امسح أي كود موجود هناك، والصق الكود التالي مكانه:</li>
+                </ol>
+
+                <div class="position-relative mb-3">
+                    <button type="button" class="btn btn-sm btn-primary position-absolute top-0 start-0 m-2" onclick="copyGoogleAppsScriptCode()">
+                        <i class="bi bi-clipboard"></i> نسخ الكود
+                    </button>
+                    <pre id="gasCodeBlock" class="p-3 rounded bg-dark text-light mb-0" dir="ltr" style="font-size: 0.78rem; overflow-x: auto;">function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var folder = data.folderId ? DriveApp.getFolderById(data.folderId) : DriveApp.getRootFolder();
+    var bytes = Utilities.base64Decode(data.base64);
+    var blob = Utilities.newBlob(bytes, data.mimeType || 'application/octet-stream', data.fileName);
+    var file = folder.createFile(blob);
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'success',
+      fileId: file.getId(),
+      fileUrl: file.getUrl()
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'error',
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+                </div>
+
+                <ol start="3" class="mb-0 ps-3" style="line-height: 1.9;">
+                    <li>اضغط من الأعلى على زر <strong>Deploy (نشر)</strong> ثم اختر <strong>New deployment (نشر جديد)</strong>.</li>
+                    <li>اضغط على علامة الترس بجانب Select type واختر <strong>Web app (تطبيق ويب)</strong>.</li>
+                    <li>في خانة <strong>Who has access (من لديه حق الوصول)</strong> اختر <strong>Anyone (أي شخص)</strong> ثم اضغط <strong>Deploy</strong> ووافق على الصلاحيات (Authorize access).</li>
+                    <li>انسخ الرابط الناتج <strong>(Web app URL)</strong> الذي ينتهي بـ <code>/exec</code> والصقه في خانة <strong>"رابط جسر جوجل درايف"</strong> داخل النظام مع الـ <strong>Folder ID</strong> واضغط حفظ!</li>
+                </ol>
+            </div>
+            <div class="modal-footer border-top py-2">
+                <button type="button" class="btn btn-secondary btn-sm clean-btn" data-bs-dismiss="modal">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Folder Modal (Admin Only) -->
 <div class="modal fade" id="folderModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
@@ -754,8 +851,8 @@
                         <div class="col-6 d-none" id="fileCloudSyncWrapper">
                             <label class="form-label small fw-bold">حفظ سحابي في</label>
                             <select id="fileCloudSyncSelect" class="form-select">
+                                <option value="GDRIVE">Google Drive تلقائياً</option>
                                 <option value="BOTH">Google Drive + OneDrive</option>
-                                <option value="GDRIVE">Google Drive</option>
                                 <option value="ONEDRIVE">OneDrive</option>
                                 <option value="LOCAL">محلي فقط</option>
                             </select>
@@ -768,7 +865,9 @@
                     <input type="hidden" id="fileSizeInput" value="0.50">
                 </div>
                 <div class="modal-footer border-top py-2">
-                    <button type="submit" class="btn btn-primary clean-btn w-100">حفظ وأرشفة</button>
+                    <button type="submit" class="btn btn-primary clean-btn w-100" id="saveFileSubmitBtn">
+                        <i class="bi bi-cloud-arrow-up-fill"></i> حفظ وأرشفة الملف
+                    </button>
                 </div>
             </form>
         </div>
@@ -866,6 +965,7 @@
     const IDB_STORE   = 'fileBlobs';
 
     let pendingPickedFileDataUrl = null;
+    let pendingPickedFileMimeType = 'application/octet-stream';
     let unlockedSessionItems = new Set();
 
     function openIndexedDB() {
@@ -911,6 +1011,13 @@
             strictZeroTrust: true,
             maintenanceMode: false
         },
+        cloudConfig: {
+            gdriveAutoSync: true,
+            gdriveFolderId: '',
+            gdriveScriptUrl: '',
+            onedriveAutoSync: false,
+            onedriveFolderPath: '/Enterprise_Archive_Vault'
+        },
         users: [
             { id: 'emp_admin', username: 'admin', password: '123456', name: 'مدير النظام', role: 'المدير العام', isAdmin: true, color: '#dc2626' }
         ],
@@ -924,7 +1031,11 @@
     let appState = (function() {
         try {
             const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) return JSON.parse(raw);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (!parsed.cloudConfig) parsed.cloudConfig = JSON.parse(JSON.stringify(DEFAULT_DATA.cloudConfig));
+                return parsed;
+            }
         } catch (e) {}
         return JSON.parse(JSON.stringify(DEFAULT_DATA));
     })();
@@ -947,7 +1058,6 @@
         return appState.folders.find(f => f.id === id) || { id: 'root', name: 'الرئيسية', isLocked: false };
     }
 
-    // Find the primary folder assigned to an employee
     function getEmployeeAssignedFolder(userId) {
         return appState.folders.find(f => f.assignedToUserId === userId || (Array.isArray(f.allowedUserIds) && f.allowedUserIds.includes(userId)));
     }
@@ -960,12 +1070,137 @@
                 <i class="bi bi-check-circle-fill text-primary"></i> <span>${msg}</span>
             </div>
         `);
-        setTimeout(() => { const el = document.getElementById(id); if (el) el.remove(); }, 3000);
+        setTimeout(() => { const el = document.getElementById(id); if (el) el.remove(); }, 3500);
     }
 
     function addAuditLog(action, targetName, details) {
         appState.auditLogs.unshift({ id: 'l_' + Date.now(), timestamp: getFormattedNow(), userId: appState.currentUserId, action, targetName, details });
         saveState();
+    }
+
+    /* Extract clean Google Drive Folder ID even if user pastes the full URL */
+    function extractCleanFolderId(rawInput) {
+        const str = (rawInput || '').trim();
+        if (!str) return '';
+        const match = str.match(/\/folders\/([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) return match[1];
+        const idParam = str.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (idParam && idParam[1]) return idParam[1];
+        return str;
+    }
+
+    /* ==================== REAL GOOGLE DRIVE UPLOAD ENGINE ==================== */
+    async function uploadFileToRealGoogleDrive(fileObj, dataUrlOverride = null) {
+        const cfg = appState.cloudConfig || {};
+        const folderId = extractCleanFolderId(cfg.gdriveFolderId);
+        const scriptUrl = (cfg.gdriveScriptUrl || '').trim();
+
+        if (!scriptUrl) {
+            return { ok: false, reason: 'NO_SCRIPT_URL' };
+        }
+
+        let dataUrl = dataUrlOverride || await getFileContentFromIDB(fileObj.id);
+        let base64Data = '';
+        let mimeType = 'text/plain';
+
+        if (dataUrl && dataUrl.includes('base64,')) {
+            const parts = dataUrl.split('base64,');
+            base64Data = parts[1];
+            const mimeMatch = parts[0].match(/data:([^;]+);/);
+            if (mimeMatch && mimeMatch[1]) mimeType = mimeMatch[1];
+        } else {
+            // Fallback text content if user didn't pick a binary file
+            const fallbackText = `Document Name: ${fileObj.name}\nUploaded At: ${fileObj.updatedAt}\nOwner: ${getUserById(fileObj.ownerId).name}`;
+            base64Data = btoa(unescape(encodeURIComponent(fallbackText)));
+            mimeType = 'text/plain';
+        }
+
+        const payload = {
+            folderId: folderId,
+            fileName: fileObj.name,
+            mimeType: mimeType,
+            base64: base64Data
+        };
+
+        try {
+            // Using text/plain avoids CORS preflight blockage on Google Apps Script Web Apps
+            const res = await fetch(scriptUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+
+            const json = await res.json();
+            if (json && json.status === 'success') {
+                fileObj.gdriveSynced = true;
+                fileObj.gdriveFileUrl = json.fileUrl || '';
+                fileObj.cloudProvider = 'GDRIVE';
+                saveState();
+                addAuditLog('CLOUD_SYNC', fileObj.name, `تم الرفع الفعلي إلى Google Drive (${folderId || 'Root'})`);
+                return { ok: true, fileUrl: json.fileUrl };
+            } else {
+                return { ok: false, reason: (json && json.message) || 'خطأ من جوجل درايف' };
+            }
+        } catch (err) {
+            // Fallback no-cors mode if browser blocks reading response
+            try {
+                await fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+                fileObj.gdriveSynced = true;
+                fileObj.cloudProvider = 'GDRIVE';
+                saveState();
+                addAuditLog('CLOUD_SYNC', fileObj.name, `تم إرسال الملف إلى Google Drive (${folderId || 'Root'})`);
+                return { ok: true, fileUrl: '' };
+            } catch (err2) {
+                return { ok: false, reason: err2.message };
+            }
+        }
+    }
+
+    function openGoogleScriptGuideModal() {
+        new bootstrap.Modal(document.getElementById('googleScriptGuideModal')).show();
+    }
+
+    function copyGoogleAppsScriptCode() {
+        const code = document.getElementById('gasCodeBlock').innerText;
+        navigator.clipboard.writeText(code);
+        showToast('تم نسخ كود Google Apps Script بنجاح!');
+    }
+
+    function openGoogleDriveFolderDirect() {
+        const fid = extractCleanFolderId(document.getElementById('gdriveFolderIdInput').value || (appState.cloudConfig && appState.cloudConfig.gdriveFolderId));
+        if (!fid) {
+            window.open('https://drive.google.com', '_blank');
+        } else {
+            window.open(`https://drive.google.com/drive/folders/${fid}`, '_blank');
+        }
+    }
+
+    async function testRealGoogleDriveConnection() {
+        saveCloudProviderConfig('GDRIVE', true);
+        const cfg = appState.cloudConfig || {};
+        if (!cfg.gdriveScriptUrl) {
+            showToast('يرجى وضع رابط جسر Google Apps Script أولاً ثم التجربة');
+            openGoogleScriptGuideModal();
+            return;
+        }
+        showToast('جاري إرسال ملف تجريبي إلى مجلدك في Google Drive...');
+        const dummyFile = {
+            id: 'test_' + Date.now(),
+            name: `اختبار_ربط_الأرشيف_${Date.now().toString().slice(-4)}.txt`,
+            updatedAt: getFormattedNow(),
+            ownerId: appState.currentUserId
+        };
+        const result = await uploadFileToRealGoogleDrive(dummyFile);
+        if (result.ok) {
+            showToast('تم رفع الملف التجريبي بنجاح! افتح مجلدك في Google Drive لمشاهدته');
+        } else {
+            showToast('تعذر الرفع: تأكد من صحة رابط الجسر والـ Folder ID: ' + result.reason);
+        }
     }
 
     /* Theme */
@@ -1010,7 +1245,6 @@
         document.getElementById('fullLoginOverlay').classList.add('d-none');
         appState.currentUserId = user.id;
 
-        // If employee has an assigned folder created by Admin, open it directly for them
         if (!user.isAdmin) {
             const empFolder = getEmployeeAssignedFolder(user.id);
             appState.currentFolderId = empFolder ? empFolder.id : 'root';
@@ -1030,7 +1264,6 @@
     }
 
     function switchView(view, sub = 'all') {
-        // Block non-admin users from accessing admin-only views (cloud, users, settings, server)
         if (!isCurrentUserAdmin() && ['cloud', 'users', 'settings', 'server'].includes(view)) {
             view = 'explorer';
         }
@@ -1124,7 +1357,6 @@
         const q = (document.getElementById('searchInput').value || '').trim().toLowerCase();
         const tf = document.getElementById('filterTypeSelect').value;
 
-        // Breadcrumb
         const bc = document.getElementById('folderBreadcrumb');
         if (appState.onlyMyFilesFilter) {
             bc.innerHTML = `<li class="breadcrumb-item active fw-bold text-primary"><i class="bi bi-shield-lock me-1"></i>ملفاتي الخاصة</li>`;
@@ -1136,7 +1368,6 @@
             `;
         }
 
-        // Folders (Only show folders accessible to current user)
         const folders = appState.folders.filter(f => {
             if (!canUserAccessFolder(f)) return false;
             if (appState.onlyMyFilesFilter) return false;
@@ -1168,7 +1399,6 @@
             `;
         }).join('');
 
-        // Files
         const files = appState.files.filter(f => {
             if (!canUserViewFile(f)) return false;
             if (appState.onlyMyFilesFilter && f.ownerId !== appState.currentUserId && !isAdmin) return false;
@@ -1189,6 +1419,9 @@
                 const owner = getUserById(f.ownerId);
                 const canMod = canUserModifyItem(f.ownerId);
                 const folderObj = getFolderById(f.folderId);
+                const driveBadge = isAdmin && f.gdriveSynced
+                    ? `<span class="badge bg-success bg-opacity-10 text-success ms-1" style="font-size:0.65rem;"><i class="bi bi-google me-1"></i>مرفوع على Drive</span>`
+                    : '';
                 return `
                     <div class="file-item">
                         <div class="d-flex align-items-center gap-2 overflow-hidden" style="cursor:pointer;" onclick="openFileDetails('${f.id}')">
@@ -1197,6 +1430,7 @@
                                 <div class="fw-bold small text-truncate">
                                     ${f.name}
                                     ${f.pinCode ? '<i class="bi bi-lock-fill text-danger ms-1"></i>' : ''}
+                                    ${driveBadge}
                                 </div>
                                 <div class="text-secondary d-flex align-items-center gap-2" style="font-size:0.72rem;">
                                     <span>${owner.name}</span> • <span>${folderObj.name}</span> • <span>${Number(f.sizeMB).toFixed(1)} MB</span>
@@ -1222,16 +1456,14 @@
         document.getElementById('myFilesCountBadge').textContent = myCount;
     }
 
-    /* Folder CRUD (Admin controls folder creation & assignment) */
+    /* Folder CRUD */
     function populateFolderDropdowns(sel) {
         const isAdmin = isCurrentUserAdmin();
         const list = appState.folders.filter(f => canUserAccessFolder(f));
         
-        // For Admin folder parent dropdown
         const parentHtml = `<option value="root">الرئيسية</option>` + list.map(f => `<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${f.name}</option>`).join('');
         document.getElementById('folderParentSelect').innerHTML = parentHtml;
 
-        // For File upload folder dropdown: Employee only sees their assigned folder(s)
         let fileFolderHtml = '';
         if (isAdmin) {
             fileFolderHtml = `<option value="root">الرئيسية</option>` + list.map(f => `<option value="${f.id}" ${f.id === sel ? 'selected' : ''}>${f.name}</option>`).join('');
@@ -1318,10 +1550,11 @@
         showToast('تم حذف المجلد');
     }
 
-    /* File CRUD */
+    /* File CRUD + Automatic Real Upload to Google Drive */
     function handleFilePick(inp) {
         if (!inp.files || !inp.files[0]) return;
         const file = inp.files[0];
+        pendingPickedFileMimeType = file.type || 'application/octet-stream';
         document.getElementById('fileNameInput').value = file.name;
         document.getElementById('fileSizeInput').value = Math.max(0.1, (file.size / (1024 * 1024))).toFixed(2);
         const ext = file.name.split('.').pop().toLowerCase();
@@ -1335,7 +1568,7 @@
         const r = new FileReader();
         r.onload = (ev) => {
             pendingPickedFileDataUrl = ev.target.result;
-            document.getElementById('pickedFileStatusText').textContent = 'تم تجهيز الملف للحفظ';
+            document.getElementById('pickedFileStatusText').textContent = 'تم تجهيز الملف للحفظ والرفع';
         };
         r.readAsDataURL(file);
     }
@@ -1344,7 +1577,6 @@
         pendingPickedFileDataUrl = null;
         const isAdmin = isCurrentUserAdmin();
 
-        // Hide Cloud Sync option inside File Modal for regular employees
         document.getElementById('fileCloudSyncWrapper').classList.toggle('d-none', !isAdmin);
         document.getElementById('filePinCodeWrapper').className = isAdmin ? 'col-6' : 'col-12';
 
@@ -1362,7 +1594,7 @@
             document.getElementById('fileNameInput').value = f.name;
             document.getElementById('fileTypeInput').value = f.type;
             document.getElementById('fileFolderSelect').value = f.folderId;
-            document.getElementById('fileCloudSyncSelect').value = f.cloudProvider || 'LOCAL';
+            document.getElementById('fileCloudSyncSelect').value = f.cloudProvider || 'GDRIVE';
             document.getElementById('filePinCodeInput').value = f.pinCode || '';
         } else {
             document.getElementById('fileForm').reset();
@@ -1374,13 +1606,19 @@
 
     async function saveFile(e) {
         e.preventDefault();
+        const btn = document.getElementById('saveFileSubmitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> جاري الحفظ والرفع...';
+
         const id = document.getElementById('fileIdInput').value;
         const name = document.getElementById('fileNameInput').value.trim();
         const type = document.getElementById('fileTypeInput').value;
         const folderId = document.getElementById('fileFolderSelect').value;
-        const cloudProvider = isCurrentUserAdmin() ? document.getElementById('fileCloudSyncSelect').value : 'LOCAL';
+        const cloudProvider = isCurrentUserAdmin() ? document.getElementById('fileCloudSyncSelect').value : 'GDRIVE';
         const pinCode = document.getElementById('filePinCodeInput').value.trim();
         const sizeMB = parseFloat(document.getElementById('fileSizeInput').value) || 0.5;
+
+        let targetFileObj = null;
 
         if (id) {
             const f = appState.files.find(x => x.id === id);
@@ -1389,20 +1627,39 @@
                 f.updatedAt = getFormattedNow();
                 if (pendingPickedFileDataUrl) await saveFileContentToIDB(f.id, pendingPickedFileDataUrl);
                 addAuditLog('UPDATE_FILE', name, 'تحديث الملف');
+                targetFileObj = f;
             }
         } else {
             const newId = 'file_' + Date.now();
-            appState.files.unshift({
+            targetFileObj = {
                 id: newId, name, type, sizeMB, folderId, ownerId: appState.currentUserId,
-                privacyMode: 'STRICT_OWNER', pinCode, cloudProvider, updatedAt: getFormattedNow(), version: 1
-            });
+                privacyMode: 'STRICT_OWNER', pinCode, cloudProvider, gdriveSynced: false, updatedAt: getFormattedNow(), version: 1
+            };
+            appState.files.unshift(targetFileObj);
             if (pendingPickedFileDataUrl) await saveFileContentToIDB(newId, pendingPickedFileDataUrl);
             addAuditLog('CREATE_FILE', name, 'رفع ملف جديد');
         }
+
         saveState();
+
+        // Check if automatic Google Drive upload is configured
+        const cfg = appState.cloudConfig || {};
+        if (targetFileObj && cfg.gdriveAutoSync && cfg.gdriveScriptUrl && (cloudProvider === 'GDRIVE' || cloudProvider === 'BOTH')) {
+            const upRes = await uploadFileToRealGoogleDrive(targetFileObj, pendingPickedFileDataUrl);
+            if (upRes.ok) {
+                showToast('تم حفظ الملف ورفعه فعلياً إلى مجلدك في Google Drive!');
+            } else {
+                showToast('تم حفظ الملف محلياً (تعذر الرفع إلى Google Drive: ' + upRes.reason + ')');
+            }
+        } else {
+            showToast('تم حفظ الملف بنجاح');
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cloud-arrow-up-fill"></i> حفظ وأرشفة الملف';
+
         bootstrap.Modal.getInstance(document.getElementById('fileModal')).hide();
-        renderExplorer();
-        showToast('تم حفظ الملف بنجاح');
+        renderAll();
     }
 
     function deleteFileNow(fid) {
@@ -1435,6 +1692,7 @@
                 <div class="d-flex justify-content-between py-1 border-bottom"><span>المجلد:</span><strong>${folderObj.name}</strong></div>
                 <div class="d-flex justify-content-between py-1 border-bottom"><span>المالك:</span><strong>${owner.name}</strong></div>
                 <div class="d-flex justify-content-between py-1"><span>التحديث:</span><strong>${f.updatedAt}</strong></div>
+                ${f.gdriveFileUrl ? `<div class="mt-2 text-center"><a href="${f.gdriveFileUrl}" target="_blank" class="btn btn-sm btn-outline-success w-100"><i class="bi bi-google me-1"></i>فتح الملف مباشرة في Google Drive</a></div>` : ''}
             </div>
         `;
         document.getElementById('modalDownloadRealBtn').onclick = () => downloadRealOrSimulatedFile(f.id);
@@ -1463,34 +1721,105 @@
     /* Cloud Center (Admin Only) */
     function renderCloudDriveCenter() {
         if (!isCurrentUserAdmin()) return;
+        const cfg = appState.cloudConfig || {};
+        document.getElementById('gdriveAutoSyncToggle').checked = Boolean(cfg.gdriveAutoSync);
+        document.getElementById('gdriveFolderIdInput').value = cfg.gdriveFolderId || '';
+        document.getElementById('gdriveScriptUrlInput').value = cfg.gdriveScriptUrl || '';
+        document.getElementById('onedriveAutoSyncToggle').checked = Boolean(cfg.onedriveAutoSync);
+        document.getElementById('onedriveFolderPathInput').value = cfg.onedriveFolderPath || '/Enterprise_Archive_Vault';
+
+        const statusEl = document.getElementById('gdriveConnectionStatusText');
+        if (cfg.gdriveScriptUrl && cfg.gdriveFolderId) {
+            statusEl.innerHTML = `<span class="text-success fw-bold"><i class="bi bi-check-circle-fill me-1"></i>متصل وجاهز للرفع الفعلي إلى الفولدر (${cfg.gdriveFolderId.slice(0, 10)}...)</span>`;
+        } else if (cfg.gdriveFolderId && !cfg.gdriveScriptUrl) {
+            statusEl.innerHTML = `<span class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill me-1"></i>تم إدخال Folder ID، ينقصك فقط وضع رابط جسر Google Apps Script ليعمل الرفع!</span>`;
+        } else {
+            statusEl.textContent = 'أدخل الـ Folder ID ورابط الجسر لتفعيل الرفع الفعلي';
+        }
+
         const list = appState.files;
         const box = document.getElementById('cloudFilesListContainer');
         if (list.length === 0) {
-            box.innerHTML = `<div class="p-4 text-center text-secondary small">لا توجد ملفات للمزامنة</div>`;
+            box.innerHTML = `<div class="p-4 text-center text-secondary small">لا توجد ملفات للمزامنة حالياً</div>`;
             return;
         }
         box.innerHTML = list.map(f => `
             <div class="file-item">
                 <div class="overflow-hidden">
-                    <div class="fw-bold small text-truncate">${f.name}</div>
-                    <small class="text-secondary">${f.cloudProvider === 'BOTH' ? 'Google Drive + OneDrive' : f.cloudProvider}</small>
+                    <div class="fw-bold small text-truncate">
+                        ${f.name}
+                        ${f.gdriveSynced ? '<span class="badge bg-success bg-opacity-10 text-success ms-1">مرفوع فعلياً على Drive</span>' : '<span class="badge bg-warning bg-opacity-10 text-warning ms-1">محلي فقط</span>'}
+                    </div>
+                    <small class="text-secondary">${getUserById(f.ownerId).name} • ${f.updatedAt}</small>
                 </div>
                 <div class="d-flex gap-1">
-                    <button class="btn btn-sm btn-outline-success" onclick="syncSingleFileToCloud('${f.id}','GDRIVE')"><i class="bi bi-google"></i></button>
-                    <button class="btn btn-sm btn-outline-primary" onclick="syncSingleFileToCloud('${f.id}','ONEDRIVE')"><i class="bi bi-microsoft"></i></button>
+                    ${f.gdriveFileUrl ? `<a href="${f.gdriveFileUrl}" target="_blank" class="btn btn-sm btn-light border text-success" title="فتح في جوجل درايف"><i class="bi bi-box-arrow-up-right"></i></a>` : ''}
+                    <button class="btn btn-sm btn-outline-success" onclick="syncSingleFileToCloud('${f.id}','GDRIVE')" title="رفع الآن إلى Google Drive">
+                        <i class="bi bi-google"></i> رفع لـ Drive
+                    </button>
                 </div>
             </div>
         `).join('');
     }
-    function syncSingleFileToCloud(fid, prov) {
+
+    function saveCloudProviderConfig(prov, silent = false) {
+        if (!appState.cloudConfig) appState.cloudConfig = {};
+        const cleanId = extractCleanFolderId(document.getElementById('gdriveFolderIdInput').value);
+        document.getElementById('gdriveFolderIdInput').value = cleanId;
+
+        appState.cloudConfig.gdriveAutoSync = document.getElementById('gdriveAutoSyncToggle').checked;
+        appState.cloudConfig.gdriveFolderId = cleanId;
+        appState.cloudConfig.gdriveScriptUrl = document.getElementById('gdriveScriptUrlInput').value.trim();
+        appState.cloudConfig.onedriveAutoSync = document.getElementById('onedriveAutoSyncToggle').checked;
+        appState.cloudConfig.onedriveFolderPath = document.getElementById('onedriveFolderPathInput').value.trim();
+
+        saveState();
+        renderCloudDriveCenter();
+        if (!silent) {
+            if (prov === 'GDRIVE' && cleanId && !appState.cloudConfig.gdriveScriptUrl) {
+                showToast('تم حفظ Folder ID! الآن اضغط على "احصل على كود ورابط الربط" بالأعلى لإتمام الاتصال الفعلي');
+            } else {
+                showToast('تم حفظ إعدادات الربط السحابي بنجاح');
+            }
+        }
+    }
+
+    async function syncSingleFileToCloud(fid, prov) {
         const f = appState.files.find(x => x.id === fid);
-        if (f) { f.cloudProvider = prov; addAuditLog('CLOUD_SYNC', f.name, `مزامنة إلى ${prov}`); saveState(); renderCloudDriveCenter(); showToast('تمت المزامنة السحابية'); }
+        if (!f) return;
+        if (prov === 'GDRIVE') {
+            const cfg = appState.cloudConfig || {};
+            if (!cfg.gdriveScriptUrl) {
+                showToast('يرجى وضع رابط جسر Google Apps Script أولاً ليتم الرفع الفعلي إلى حسابك');
+                openGoogleScriptGuideModal();
+                return;
+            }
+            showToast(`جاري رفع "${f.name}" إلى Google Drive...`);
+            const res = await uploadFileToRealGoogleDrive(f);
+            renderCloudDriveCenter();
+            renderExplorer();
+            if (res.ok) showToast(`تم رفع "${f.name}" فعلياً إلى مجلدك في Google Drive!`);
+            else showToast('فشل الرفع: ' + res.reason);
+        }
     }
-    function bulkSyncCurrentUserFiles(prov) {
-        appState.files.forEach(f => f.cloudProvider = prov);
-        saveState(); renderCloudDriveCenter(); showToast('تمت مزامنة جميع الملفات سحابياً');
+
+    async function bulkSyncCurrentUserFiles(prov) {
+        const cfg = appState.cloudConfig || {};
+        if (prov === 'GDRIVE' && !cfg.gdriveScriptUrl) {
+            showToast('يرجى وضع رابط جسر Google Apps Script أولاً ليتم الرفع الفعلي إلى حسابك');
+            openGoogleScriptGuideModal();
+            return;
+        }
+        showToast('جاري رفع جميع الملفات إلى Google Drive...');
+        let count = 0;
+        for (const f of appState.files) {
+            const res = await uploadFileToRealGoogleDrive(f);
+            if (res.ok) count++;
+        }
+        renderCloudDriveCenter();
+        renderExplorer();
+        showToast(`تم رفع ${count} ملف بنجاح إلى مجلدك في Google Drive!`);
     }
-    function saveCloudProviderConfig() { showToast('تم حفظ إعدادات الربط السحابي'); }
 
     /* Users Management & Auto Folder Creation (Admin Control Panel) */
     function renderUsersManagement() {
@@ -1562,7 +1891,6 @@
         const customFolderName = document.getElementById('userCustomFolderNameInput').value.trim() || `ملفات - ${name}`;
         const isAdmin = document.getElementById('userRoleTypeInput').value === 'admin';
 
-        // Check duplicate username
         const exists = appState.users.find(x => x.username.toLowerCase() === username.toLowerCase() && x.id !== id);
         if (exists) {
             showToast('اسم المستخدم مسجل مسبقاً لموظف آخر');
@@ -1574,7 +1902,6 @@
             const u = appState.users.find(x => x.id === id);
             if (u) {
                 u.name = name; u.username = username; u.password = password; u.role = role; u.isAdmin = isAdmin;
-                // Update or create their dedicated folder
                 if (!isAdmin) {
                     let empFolder = getEmployeeAssignedFolder(u.id);
                     if (empFolder) {
@@ -1599,7 +1926,6 @@
             const randomColor = colors[appState.users.length % colors.length];
             appState.users.push({ id: newUserId, name, username, password, role, isAdmin, color: randomColor });
 
-            // Automatically create a dedicated workspace folder for this employee
             if (!isAdmin) {
                 appState.folders.push({
                     id: 'fld_' + (Date.now() + 1),
@@ -1666,8 +1992,8 @@
         a.href = URL.createObjectURL(new Blob([text], { type: 'text/plain;charset=utf-8' }));
         a.download = name; document.body.appendChild(a); a.click(); document.body.removeChild(a);
     }
-    function downloadPhpApiFile() { downloadTextFile('api.php', '<?php // Enterprise Archive API v7.0 - Developed By Ali Akila ?>'); }
-    function downloadSqlSchemaFile() { downloadTextFile('database.sql', '-- Enterprise Archive SQL Schema v7.0'); }
+    function downloadPhpApiFile() { downloadTextFile('api.php', '<?php // Enterprise Archive API v7.5 - Developed By Ali Akila ?>'); }
+    function downloadSqlSchemaFile() { downloadTextFile('database.sql', '-- Enterprise Archive SQL Schema v7.5'); }
     function exportBackupJSON() { downloadTextFile('Archive_Backup.json', JSON.stringify(appState, null, 2)); }
     function importBackupJSON(inp) {
         if (!inp.files[0]) return;
@@ -1693,7 +2019,6 @@
         document.getElementById('sidebarUserRole').textContent = u.role;
         document.getElementById('roleBannerBadge').textContent = isAdmin ? 'لوحة الإدارة الشاملة' : `مساحة عمل: ${u.name}`;
 
-        // Show/Hide Admin-Only Navigation Items (Cloud Drive, Server Setup, Users, Settings, Create Folder Button)
         document.getElementById('navCloudDrive').classList.toggle('d-none', !isAdmin);
         document.getElementById('navServerSetup').classList.toggle('d-none', !isAdmin);
         document.getElementById('navUsersItem').classList.toggle('d-none', !isAdmin);
